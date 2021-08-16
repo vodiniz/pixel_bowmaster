@@ -1,6 +1,8 @@
 import pygame
 from pygame.locals import *
 
+
+#criar um settings.py
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 800
 
