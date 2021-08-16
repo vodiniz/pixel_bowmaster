@@ -71,9 +71,15 @@ class Archer(pygame.sprite.Sprite):
 
 
         if self.moving_up == True:
-            self.archer_position[1] -= 8
+            if self.archer_position[1] <= 0:
+                pass
+            else:
+                self.archer_position[1] -= 7
         if self.moving_down == True:
-            self.archer_position[1] += 8
+            if self.archer_position[1] >= 650:
+                pass
+            else:
+                self.archer_position[1] += 7
 
 
         self.rect[0] = self.archer_position[0]
@@ -113,7 +119,8 @@ class Balloon(pygame.sprite.Sprite):
         self.rect[0] = xpos
         self.popped = False
         
-        
+        balloon_mask = pygame.mask.from_surface(self.image)
+
 
     def is_off_screen(self):
         if self.rect[1] <= -200:
@@ -146,6 +153,7 @@ class Balloon(pygame.sprite.Sprite):
         self.rect[1] = self.balloon_position[1]
 
 
+
 class Arrow(pygame.sprite.Sprite):
 
     def __init__(self,xpos,ypos):
@@ -159,6 +167,8 @@ class Arrow(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.arrow_position = [xpos,ypos]
         self.rect[0], self.rect[1] = xpos, ypos
+
+        arrow_mask = pygame.mask.from_surface(self.image)
 
     def is_arrow_off_screen(self):
         if self.arrow_position[0] > 1600:
@@ -174,6 +184,38 @@ class Arrow(pygame.sprite.Sprite):
             self.kill()
 
 
+class MouseArrow(pygame.sprite.Sprite):
+
+    def __init__(self,xpos,ypos):
+        pygame.sprite.Sprite.__init__(self)
+
+
+        self.image = pygame.image.load('Assets/arrow/arrow.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (150,150))
+        self.rect = self.image.get_rect()
+        self.arrow_position = [xpos,ypos]
+        self.rect[0], self.rect[1] = xpos, ypos
+
+        self.arrow_mask = pygame.mask.from_surface(self.image)
+        print(pygame.mask.Mask.get_rect(self.arrow_mask))
+
+    def is_arrow_off_screen(self):
+        if self.arrow_position[0] > 1600:
+            return True
+        else:
+            return False
+
+        
+    def update(self):
+        self.arrow_position = pygame.mouse.get_pos()[0]-self.rect[2]/2, pygame.mouse.get_pos()[1]-self.rect[3]/2
+        self.rect[0],self.rect[1] = self.arrow_position
+
+
+
+
+
+
+
 
 def create_arrow_shooting(xpos, ypos):
     new_arrow = Arrow(xpos, ypos)
@@ -181,12 +223,15 @@ def create_arrow_shooting(xpos, ypos):
 
 def check_balloon_hit(arrow_group, balloon_group):
 
-    result = pygame.sprite.groupcollide(arrow_group, balloon_group, False, False)
+    result = pygame.sprite.groupcollide(arrow_group, balloon_group, False, False, pygame.sprite.collide_mask)
     if len(result) > 0:
-        for key,value in result.items():
-            for balloon in value:
-                balloon.popped = True
-                if balloon.popped == True:
+        for arrow,balloon_list in result.items():
+            for balloon in balloon_list:
+                balloon_middle = balloon.rect[0] + balloon.rect[2]/2
+                arrow_tip = arrow.rect[0] + (3/4)*arrow.rect[2]
+                print(arrow_tip,'<',balloon_middle)
+                if arrow_tip < balloon_middle:
+                    balloon.popped = True
                     print('POPPED')
 
 
@@ -217,10 +262,16 @@ for i in range(15):
     new_balloon = Balloon(FIRST_BALLOON_DISTANCE+i*50)
     balloon_group.add(new_balloon)
 
+
 arrow_group = pygame.sprite.Group()
 
 
+#MOUSE ARROW FOR TESTING
+# mouse_arrow = MouseArrow(pygame.mouse.get_pos()[1],pygame.mouse.get_pos()[1])
+# arrow_group.add(mouse_arrow)
+
 clock = pygame.time.Clock()
+
 
 while True:
     clock.tick(60)
