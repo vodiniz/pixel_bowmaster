@@ -24,8 +24,7 @@ class MouseArrow(pygame.sprite.Sprite):
     def update(self):
         self.arrow_position = pygame.mouse.get_pos()[0]-self.rect[2]/2, pygame.mouse.get_pos()[1]-self.rect[3]/2
         self.rect[0],self.rect[1] = self.arrow_position
-        if self.arrow_position[0] > 1600:
-            self.kill()
+
 
 
 
