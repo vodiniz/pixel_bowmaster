@@ -253,12 +253,9 @@ def draw_sprites(screen):
 
 def check_game_over():
     if archer.arrows == 0 and len(arrow_group) == 0:
-        input()
         return True
     else:
         return False
-
-
 
 
 def main_menu():
@@ -305,12 +302,18 @@ def main_menu():
                    click = True 
 
 
-
-
         pygame.display.update()
 
 def game():
     running = True
+
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+
+    archer = Archer()
+    archer_group.add(archer)
+    create_balloons(15)
     while running:
         clock.tick(settings.CLOCK)
 
@@ -356,17 +359,53 @@ def game():
         draw_sprites(screen)
 
         if check_game_over():
-            break
+            game_over()
 
         pygame.display.update()
 
+def game_over():
+    running = True
+    current_image = 0
 
+    opaque_surface = pygame.Surface((settings.SCREEN_WIDTH,settings.SCREEN_HEIGHT))
+    opaque_surface.set_alpha(180)
+    opaque_surface.fill((0, 0, 0))
+    while running:
+        clock.tick(settings.CLOCK)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+                if event.key == K_SPACE:
+                    current_image = 0
+
+        blit_game_static_elements(screen)
+        screen.blit(opaque_surface,(0, 0))
+        if current_image <=32:
+            screen.blit(GAME_OVER[int(current_image)],\
+                (settings.SCREEN_WIDTH/2 - GAME_OVER[int(current_image)].get_width()/2, -700))
+
+        else:
+            screen.blit(STATIC_GAME_OVER,\
+                (settings.SCREEN_WIDTH/2 - STATIC_GAME_OVER.get_width()/2,\
+                398))
+
+        current_image += settings.GAME_OVER_ANIMATION_SPEED
+        pygame.display.update()
 
 
 pygame.init()
+pygame.display.set_caption(settings.WINDOW_NAME)
+
+
 myfont = pygame.font.Font(settings.PIXEL_FONT, 50)
 
 screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
+icon = pygame.image.load(settings.ICON).convert_alpha()
+pygame.display.set_icon(icon)
+
+
 BACKGROUND = pygame.image.load('Assets/background/background.png').convert()
 BACKGROUND = pygame.transform.scale(BACKGROUND, (settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
 
@@ -384,6 +423,20 @@ PLAY_BUTTON = pygame.image.load(settings.PLAY_BUTTON).convert()
 PLAY_BUTTON = pygame.transform.scale(PLAY_BUTTON,settings.PLAY_BUTTON_SIZE)
 PLAY_BUTTON_RED = pygame.image.load(settings.PLAY_BUTTON_RED).convert()
 PLAY_BUTTON_RED = pygame.transform.scale(PLAY_BUTTON_RED,settings.PLAY_BUTTON_SIZE)
+
+GAME_OVER_FILE = settings.GAME_OVER
+GAME_OVER = []
+for image in GAME_OVER_FILE:
+    image = pygame.image.load(image).convert_alpha()
+    image = pygame.transform.scale(image,(int(settings.GAME_OVER_SCALE*54),\
+                int(settings.GAME_OVER_SCALE*154)))
+    GAME_OVER.append(image)
+
+STATIC_GAME_OVER = pygame.image.load(settings.STATIC_GAME_OVER).convert_alpha()
+STATIC_GAME_OVER = pygame.transform.scale(STATIC_GAME_OVER,\
+    ((int(settings.GAME_OVER_SCALE*STATIC_GAME_OVER.get_width()),\
+        int(settings.GAME_OVER_SCALE*STATIC_GAME_OVER.get_height()))))
+
 
 archer_group = pygame.sprite.Group()
 archer = Archer()
