@@ -5,9 +5,9 @@ ICON = 'Assets/menu/icon.png'
 
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 800
+ 
 
-
-ARROW_COUNT_LEVEL_1 = 10
+ARROW_COUNT_LEVEL_1 = 1
 ARCHER_STARTING_POSITION = [20,20]
 ARCHER_SHOOTING_ANIMATION_SPEED = 0.10
 ARCHER_IDLE_ANIMATION_SPEED = 0.07
@@ -34,8 +34,16 @@ PIXEL_FONT = ('Assets/font/pixel_font.ttf')
 
 PLAY_BUTTON = ('Assets/menu/Play_button.png')
 PLAY_BUTTON_RED = ('Assets/menu/Play_button_red.png')
-PLAY_BUTTON_MULTIPLIER = 3.1
+PLAY_BUTTON_MULTIPLIER = 5
 PLAY_BUTTON_SIZE = ((int(55*PLAY_BUTTON_MULTIPLIER), int(20*PLAY_BUTTON_MULTIPLIER)))
+
+PLAY_BUTTON_RED = ('Assets/menu/Play_button_red.png')
+
+MENU_BUTTON = ('Assets/menu/menu_text.png')
+MENU_BUTTON_RED = ('Assets/menu/menu_text_red.png')
+TRY_AGAIN_BUTTON = ('Assets/menu/try_again.png')
+TRY_AGAIN_BUTTON_RED = ('Assets/menu/try_again_red.png')
+BUTTON_SCALE = 4
 
 GAME_OVER = [
 'Assets/menu/game_over/game_over_1.png',\

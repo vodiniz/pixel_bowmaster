@@ -206,6 +206,45 @@ class MouseArrow(pygame.sprite.Sprite):
         self.rect[0],self.rect[1] = self.arrow_position
 
 
+
+class Button(pygame.sprite.Sprite):
+    def __init__(self, blue_image, red_image, xpos, ypos):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.blue_image = pygame.image.load(blue_image).convert()
+        self.blue_image = pygame.transform.scale(self.blue_image,\
+         (int(settings.BUTTON_SCALE*self.blue_image.get_width()), int(settings.BUTTON_SCALE*self.blue_image.get_height())))
+
+        self.red_image = pygame.image.load(red_image).convert()
+        self.red_image = pygame.transform.scale(self.red_image,\
+         (int(settings.BUTTON_SCALE*self.red_image.get_width()), int(settings.BUTTON_SCALE*self.red_image.get_height())))
+
+        self.image = self.blue_image
+        self.position = [xpos - self.image.get_width()/2,ypos]
+        self.rect = self.image.get_rect()
+        self.rect[0], self.rect[1] = self.position[0], self.position[1]
+        self.clicked = False
+
+    def update(self, mouse_x, mouse_y, click):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        if self.rect.collidepoint(mouse_x, mouse_y):
+            self.image = self.red_image
+            if click:
+                self.clicked = True
+        else:
+            self.image = self.blue_image
+            self.clicked = False
+
+ 
+class State:
+    menu = False
+    game = False
+    game_over = False
+
+
+        
+
+
 def create_arrow_shooting(xpos, ypos):
     new_arrow = Arrow(xpos, ypos)
     arrow_group.add(new_arrow) 
@@ -251,8 +290,9 @@ def draw_sprites(screen):
     balloon_group.draw(screen)
     arrow_group.draw(screen)
 
-def check_game_over():
-    if archer.arrows == 0 and len(arrow_group) == 0:
+
+def check_game_over(player, group):
+    if player.arrows == 0 and len(arrow_group) == 0:
         return True
     else:
         return False
@@ -268,6 +308,10 @@ def main_menu():
     play_rect[0] = (settings.SCREEN_WIDTH/2 - PLAY_BUTTON.get_width()/2)
     play_rect[1] = 400
     while True:
+        if state.game:
+            state.game = False
+            game()
+
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
@@ -357,41 +401,69 @@ def game():
         
         check_balloon_hit(arrow_group,balloon_group)
         draw_sprites(screen)
-
-        if check_game_over():
+  
+        if check_game_over(archer,arrow_group):
             game_over()
+            running = False
+
+        
 
         pygame.display.update()
 
 def game_over():
     running = True
     current_image = 0
-
+    
     opaque_surface = pygame.Surface((settings.SCREEN_WIDTH,settings.SCREEN_HEIGHT))
     opaque_surface.set_alpha(180)
     opaque_surface.fill((0, 0, 0))
+
+    button_group = pygame.sprite.Group()
+    try_button = Button(settings.TRY_AGAIN_BUTTON, settings.TRY_AGAIN_BUTTON_RED,\
+        settings.SCREEN_WIDTH/2 , 500)
+
+    menu_button = Button(settings.MENU_BUTTON, settings.MENU_BUTTON_RED,\
+        settings.SCREEN_WIDTH/2 , 650)
+    button_group.add(try_button)
+    button_group.add(menu_button)
+
     while running:
         clock.tick(settings.CLOCK)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-
-            if event.type == KEYDOWN:
-                if event.key == K_SPACE:
-                    current_image = 0
+        mouse_x, mouse_y = pygame.mouse.get_pos()
 
         blit_game_static_elements(screen)
         screen.blit(opaque_surface,(0, 0))
         if current_image <=32:
             screen.blit(GAME_OVER[int(current_image)],\
-                (settings.SCREEN_WIDTH/2 - GAME_OVER[int(current_image)].get_width()/2, -700))
+                (settings.SCREEN_WIDTH/2 - GAME_OVER[int(current_image)].get_width()/2, -900))
 
         else:
             screen.blit(STATIC_GAME_OVER,\
                 (settings.SCREEN_WIDTH/2 - STATIC_GAME_OVER.get_width()/2,\
-                398))
+                198))
+        
+
 
         current_image += settings.GAME_OVER_ANIMATION_SPEED
+        
+        click = False
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                   click = True 
+        
+        button_group.update(mouse_x, mouse_y, click)
+        button_group.draw(screen)
+
+        if try_button.clicked:
+            running = False
+            state.game = True
+        if menu_button.clicked:
+            running = False
         pygame.display.update()
 
 
@@ -404,7 +476,6 @@ myfont = pygame.font.Font(settings.PIXEL_FONT, 50)
 screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
 icon = pygame.image.load(settings.ICON).convert_alpha()
 pygame.display.set_icon(icon)
-
 
 BACKGROUND = pygame.image.load('Assets/background/background.png').convert()
 BACKGROUND = pygame.transform.scale(BACKGROUND, (settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
@@ -437,6 +508,7 @@ STATIC_GAME_OVER = pygame.transform.scale(STATIC_GAME_OVER,\
     ((int(settings.GAME_OVER_SCALE*STATIC_GAME_OVER.get_width()),\
         int(settings.GAME_OVER_SCALE*STATIC_GAME_OVER.get_height()))))
 
+state = State()
 
 archer_group = pygame.sprite.Group()
 archer = Archer()
@@ -451,6 +523,9 @@ mouse_arrow_testing(False)
 
 clock = pygame.time.Clock()
 
-main_menu()
+gaming = True
+
+while True:
+    main_menu()
 
 
