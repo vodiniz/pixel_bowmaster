@@ -7,7 +7,7 @@ SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 800
  
 
-ARROW_COUNT_LEVEL_1 = 1
+ARROW_COUNT_LEVEL_1 = 15
 ARCHER_STARTING_POSITION = [20,20]
 ARCHER_SHOOTING_ANIMATION_SPEED = 0.10
 ARCHER_IDLE_ANIMATION_SPEED = 0.07
@@ -18,6 +18,35 @@ BALLOON_ANIMATION_SPEED = 0.15
 FIRST_BALLOON_DISTANCE = 600
 
 ARROW_SPEED = 6.8
+
+BUTTERFREE = ['Assets/butterfree/Butterfree1.png',
+'Assets/butterfree/Butterfree2.png',
+'Assets/butterfree/Butterfree3.png',
+'Assets/butterfree/Butterfree4.png',
+'Assets/butterfree/Butterfree5.png',
+'Assets/butterfree/Butterfree6.png',
+'Assets/butterfree/Butterfree7.png',
+'Assets/butterfree/Butterfree8.png',
+'Assets/butterfree/Butterfree9.png',
+'Assets/butterfree/Butterfree10.png'
+]
+
+FLYING_BUTTERFREE = ['Assets/butterfree/flying_buterfree1.png',
+'Assets/butterfree/flying_buterfree2.png',
+'Assets/butterfree/flying_buterfree3.png',
+'Assets/butterfree/flying_buterfree4.png',
+'Assets/butterfree/flying_buterfree5.png'
+]
+
+BUTTERFREE_SPEED = 1.9
+BUTTERFREE_ANIMATION_SPEED = 0.15
+FIRST_BUTTERFREE_DISTANCE = 600
+
+
+TARGET = ['Assets/target/target.png']
+TARGET_SPEED = 2.5
+TARGET_ANIMATION_SPEED = 3
+
 
 CLOCK = 60
 
@@ -31,6 +60,11 @@ MENU_SIZE_MULTIPLIER = 6.5
 MENU_SIZE = (int(111*MENU_SIZE_MULTIPLIER),int(58*MENU_SIZE_MULTIPLIER))
 
 PIXEL_FONT = ('Assets/font/pixel_font.ttf')
+
+
+
+
+
 
 PLAY_BUTTON = ('Assets/menu/Play_button.png')
 PLAY_BUTTON_RED = ('Assets/menu/Play_button_red.png')
@@ -84,4 +118,6 @@ GAME_OVER = [
 STATIC_GAME_OVER =  'Assets/menu/game_over/game_over.png'
 GAME_OVER_ANIMATION_SPEED = 0.3
 GAME_OVER_SCALE = 9
+
+
 

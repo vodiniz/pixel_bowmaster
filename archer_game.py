@@ -1,4 +1,4 @@
-import pygame
+import pygame, random
 from settings import settings
 from pygame.locals import *
 
@@ -122,6 +122,9 @@ class Balloon(pygame.sprite.Sprite):
     def is_off_screen(self):
         if self.rect[1] <= -200:
             return True
+        if self.popped:
+            if self.rect[1] > 800:
+                return True
         else:
             return False
                 
@@ -144,10 +147,143 @@ class Balloon(pygame.sprite.Sprite):
             self.image = self.balloon_images[int(self.current_image)]
             self.balloon_position[1] -= self.balloon_speed
 
-        if self.is_off_screen() and self.popped == False:
-            self.balloon_position[1] = 900
+        if self.is_off_screen():
+            if self.popped:
+                self.kill()
+            else:
+                self.balloon_position[1] = 900
+                
 
         self.rect[1] = self.balloon_position[1]
+
+
+class Butterfree(pygame.sprite.Sprite):
+
+    def __init__(self,xpos,inverted):
+        pygame.sprite.Sprite.__init__(self)
+        
+        self.butterfree_images = []
+
+        for image in settings.BUTTERFREE:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(50 , 50))
+            self.butterfree_images.append(convert_image)
+
+
+        self.flying_butterfree = []
+
+        for image in settings.FLYING_BUTTERFREE:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(50 , 50))
+            self.flying_butterfree.append(convert_image)
+
+        self.current_image = 0
+        self.image = self.butterfree_images[self.current_image]
+
+        self.rect = self.image.get_rect()
+        self.popped = False
+
+        if inverted:
+            self.speed = - settings.BUTTERFREE_SPEED
+            self.butterfree_position = [xpos, -random.randint(100, 500)]
+        else:
+            self.speed =  settings.BUTTERFREE_SPEED
+            self.butterfree_position = [xpos, random.randint(900, 1300)]
+        
+        self.rect[0] = self.butterfree_position[0]
+        self.rect[1] = self.butterfree_position[1]
+
+
+        
+        butterfree_mask = pygame.mask.from_surface(self.image)
+
+
+    def is_off_screen(self):
+        if self.rect[1] <= -200 or self.rect[1] >= 1000:
+            return True
+        if self.popped:
+            if self.rect[1] > 800:
+                return True
+        if self.rect[0] < 0:
+            return True
+        else:
+            return False
+                
+
+    def update(self):
+        self.current_image += settings.BUTTERFREE_ANIMATION_SPEED
+
+        if self.popped == True:
+            if self.current_image >= len(self.flying_butterfree):
+                self.current_image = 0
+            self.image = self.flying_butterfree[int(self.current_image)]
+
+
+        else:
+            if self.current_image >= len(self.butterfree_images):
+                self.current_image = 0
+            self.image = self.butterfree_images[int(self.current_image)]
+
+        if self.is_off_screen():
+            if self.popped:
+                self.kill()
+            else:
+                if self.rect[1] > 800 and self.speed > 0 :
+                    self.speed = -settings.BUTTERFREE_SPEED
+                if self.rect[1] < 0 and self.speed < 0:
+                    self.speed = settings.BUTTERFREE_SPEED
+
+
+        if self.popped:
+            if self.speed > 0:
+                self.butterfree_position[0] += -2*self.speed
+                self.butterfree_position[1] += -self.speed
+            else:
+                self.butterfree_position[0] += 2*self.speed
+                self.butterfree_position[1] += self.speed
+
+        else:
+            self.butterfree_position[1] += self.speed
+
+        self.rect[0] = self.butterfree_position[0]
+        self.rect[1] = self.butterfree_position[1]
+
+
+class Target(pygame.sprite.Sprite):
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        
+        self.target_images = []
+
+        for image in settings.TARGET:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(58 , 140))
+            self.target_images.append(convert_image)
+    
+        self.current_image = 0
+        self.image = self.target_images[self.current_image]
+        self.speed = settings.TARGET_SPEED
+        self.target_position = [1300,100]
+
+        self.rect = self.image.get_rect()
+        self.rect[0], self.rect[1] = self.target_position
+        target_mask = pygame.mask.from_surface(self.image)
+
+
+    def update(self):
+        self.current_image += settings.BUTTERFREE_ANIMATION_SPEED
+        
+        if self.current_image >= len(self.target_images):
+            self.current_image = 0
+        self.image = self.target_images[int(self.current_image)]
+
+        if self.rect[1] < 100 or self.rect[1]>650:
+            self.speed = -self.speed
+
+        self.target_position[1] -= self.speed
+        self.rect[1] = self.target_position[1]
+        
 
 class Arrow(pygame.sprite.Sprite):
 
@@ -192,7 +328,6 @@ class MouseArrow(pygame.sprite.Sprite):
         self.rect[0], self.rect[1] = xpos, ypos
 
         self.arrow_mask = pygame.mask.from_surface(self.image)
-        print(pygame.mask.Mask.get_rect(self.arrow_mask))
 
     def is_arrow_off_screen(self):
         if self.arrow_position[0] > 1600:
@@ -237,12 +372,12 @@ class Button(pygame.sprite.Sprite):
 
  
 class State:
-    menu = False
-    game = False
-    game_over = False
-
-
-        
+    def __init__(self):
+        self.menu = False
+        self.game = False
+        self.level2 = False
+        self.level3 = False
+        self.game_over = False
 
 
 def create_arrow_shooting(xpos, ypos):
@@ -250,7 +385,7 @@ def create_arrow_shooting(xpos, ypos):
     arrow_group.add(new_arrow) 
 
 
-def check_balloon_hit(arrow_group, balloon_group):
+def check_enemy_hit(arrow_group, balloon_group):
 
     result = pygame.sprite.groupcollide(arrow_group, balloon_group, False, False, \
         pygame.sprite.collide_mask)
@@ -262,10 +397,43 @@ def check_balloon_hit(arrow_group, balloon_group):
                 if arrow_tip < balloon_middle:
                     balloon.popped = True
 
+def check_target_center_hit(arrow_group, target_group):
+    result = pygame.sprite.groupcollide(arrow_group, target_group, False, False, \
+        pygame.sprite.collide_mask)
+
+    # DE 11 A 18 NO ASEPRITE, TENHO 140 DE ALTURA NORMALMENTE. DE BAIXO PARA CIMA 32 E 53
+    if len(result) > 0:
+        for arrow,target_list in result.items():
+            for target in target_list:
+                low_middle_point = target.rect[1] + target.rect[3] + 32
+                high_middle_point = target.rect[1] + target.rect[3] + 56
+                offset = 2
+                arrow_tip_x = arrow.rect[0] + (3/4)*arrow.rect[2]
+                arrow_tip_y = arrow.rect[1] + arrow.rect[3] + 15
+                #print(low_middle_point,'>', arrow_tip_y,'>',high_middle_point)
+                if arrow_tip_y > low_middle_point - 5 and arrow_tip_y < high_middle_point + offset:
+                    #print (arrow_tip_x)
+                    if arrow_tip_x + 20 > target.rect[0] + (1/3)*target.rect[2] and arrow_tip_x< 1330 :
+                        return True
+        
+
+
 def create_balloons(balloon_number):
     for i in range(balloon_number):
         new_balloon = Balloon(settings.FIRST_BALLOON_DISTANCE+i*50)
         balloon_group.add(new_balloon)
+
+def create_random_balloons(balloon_number):
+    for i in range(balloon_number):
+        new_balloon = Balloon(settings.FIRST_BALLOON_DISTANCE+i*50)
+        new_balloon.balloon_speed = round(random.uniform(1.5,2), 1)
+        new_balloon.balloon_position[1] = random.randint(900,1200)
+        balloon_group.add(new_balloon)
+
+def create_butterfree(number):
+    for i in range(number):
+        new_enemy = Butterfree(settings.FIRST_BUTTERFREE_DISTANCE+i*50, random.randint(0,1))
+        butterfree_group.add(new_enemy)
 
 def mouse_arrow_testing(boolean):
     if boolean:
@@ -291,11 +459,16 @@ def draw_sprites(screen):
     arrow_group.draw(screen)
 
 
-def check_game_over(player, group):
+def check_game_over(player, arrow_group, enemy_group):
     if player.arrows == 0 and len(arrow_group) == 0:
-        return True
+            return True
     else:
         return False
+
+def go_next_next_level(enemy_group):
+    if len(enemy_group) == 0:
+        return True
+
 
 
 def main_menu():
@@ -311,6 +484,13 @@ def main_menu():
         if state.game:
             state.game = False
             game()
+            state.game = False
+        if state.level2 == True:
+            game_level_2()
+            state.level2 = False
+        if state.level3 == True:
+            game_level_3()
+            state.level3 = False
 
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -355,6 +535,7 @@ def game():
     balloon_group.empty()
     arrow_group.empty()
 
+    mouse_arrow_testing(True)
     archer = Archer()
     archer_group.add(archer)
     create_balloons(15)
@@ -399,15 +580,234 @@ def game():
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
         
-        check_balloon_hit(arrow_group,balloon_group)
+        check_enemy_hit(arrow_group,balloon_group)
         draw_sprites(screen)
   
-        if check_game_over(archer,arrow_group):
+        if check_game_over(archer, arrow_group, balloon_group):
             game_over()
+            running = False
+
+        if go_next_next_level(balloon_group):
+            state.level2 = True
             running = False
 
         
 
+        pygame.display.update()
+
+
+def game_level_2():
+    running = True
+    print('level 2')
+
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+
+    mouse_arrow_testing(True)
+    archer = Archer()
+    archer_group.add(archer)
+    create_random_balloons(15)
+
+    while running:
+        clock.tick(settings.CLOCK)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+        update_sprites()
+        
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+        screen.blit(arrow_count_label,(1305, 27))
+
+        check_enemy_hit(arrow_group,balloon_group)
+        draw_sprites(screen)
+  
+        if check_game_over(archer, arrow_group, balloon_group):
+            game_over()
+            running = False
+
+        if go_next_next_level(balloon_group):
+            state.level3 = True
+            running = False
+        pygame.display.update()
+
+
+def game_level_3():
+    running = True
+    print('level 3')
+
+    
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+
+    mouse_arrow_testing(True)
+    archer = Archer()
+    archer_group.add(archer)
+    create_butterfree(3)
+
+    while running:
+        clock.tick(settings.CLOCK)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+
+        archer_group.update()
+        butterfree_group.update()
+        arrow_group.update()
+        
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+        screen.blit(arrow_count_label,(1305, 27))
+
+        check_enemy_hit(arrow_group,butterfree_group)
+        
+        archer_group.draw(screen)
+        butterfree_group.draw(screen)
+        arrow_group.draw(screen)
+  
+        if check_game_over(archer, arrow_group, butterfree_group):
+            game_over()
+            running = False
+
+        if go_next_next_level(butterfree_group):
+            state.level3 = True
+            running = False
+        pygame.display.update()
+
+
+
+def game_level_4():
+    running = True
+    print('level 4')
+
+    
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+
+    mouse_arrow_testing(True)
+    archer = Archer()
+    archer_group.add(archer)
+    target = Target()
+    target_group.add(target)
+
+
+    while running:
+        clock.tick(settings.CLOCK)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+
+        archer_group.update()
+        target_group.update()
+        arrow_group.update()
+        
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+        screen.blit(arrow_count_label,(1305, 27))
+
+        if check_target_center_hit(arrow_group, target_group):
+            print('bullseye')
+        
+        archer_group.draw(screen)
+        target_group.draw(screen)
+        arrow_group.draw(screen)
+  
+        if check_game_over(archer, arrow_group, target_group):
+            game_over()
+            running = False
+
+        if go_next_next_level(target_group):
+            state.level3 = True
+            running = False
         pygame.display.update()
 
 def game_over():
@@ -515,17 +915,19 @@ archer = Archer()
 archer_group.add(archer)
 
 balloon_group = pygame.sprite.Group()
-create_balloons(15)
 
+butterfree_group = pygame.sprite.Group()
+
+target_group = pygame.sprite.Group()
 
 arrow_group = pygame.sprite.Group()
-mouse_arrow_testing(False)
 
 clock = pygame.time.Clock()
 
 gaming = True
 
 while True:
+    game_level_4()
     main_menu()
 
 
