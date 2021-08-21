@@ -546,6 +546,7 @@ class State:
         self.level9 = False
         self.level10 = False
         self.game_over = False
+        self.testing = False
 
 
 def create_arrow_shooting(xpos, ypos):
@@ -646,7 +647,7 @@ def create_bridges(bridge_group):
         bridge = Bridge(900+(250*i),200*i)
         bridge_group.add(bridge)
 
-def create_slimes(slime_group, slime_number):
+def create_slimes(slime_group, slime_number,easter_egg):
  
     if slime_number > 0:
         while len(slime_group) <= 7:
@@ -654,9 +655,18 @@ def create_slimes(slime_group, slime_number):
             if pygame.sprite.spritecollide(new_slime, slime_group, False):
                 new_slime.kill()
             else:
-                slime_group.add(new_slime)
-                slime_number -= 1
-
+                if easter_egg == slime_number:
+                    image_list = []
+                    for image in settings.SLIME_EASTER_EGG:
+                        convert_image = pygame.image.load(image).convert_alpha()
+                        convert_image = pygame.transform.scale(convert_image,(120 , 120))
+                        image_list.append(convert_image)
+                    new_slime.slime_images = image_list
+                    slime_group.add(new_slime)
+                    slime_number -= 1
+                else:
+                    slime_group.add(new_slime)
+                    slime_number -= 1
     return slime_number
 
 def create_romans(roman_group, roman_number):
@@ -777,6 +787,7 @@ def main_menu():
         if state.level5:
             game_level_5()
             state.level5 = False
+
         if state.level6:
             game_level_6()
             state.level6 = False
@@ -810,6 +821,7 @@ def main_menu():
 
         if play_button.clicked:
             state.level1 = True
+            play_button.clicked = False
         if level_selection_button.clicked:
             level_selection_button.clicked = False
             state.level_selection = True
@@ -863,25 +875,32 @@ def level_selection():
             if button.name == 'button_number1.png':
                 if button.clicked:
                     game_level_1()
+                    button.clicked = False
 
             if button.name == 'button_number2.png':
                 if button.clicked:
                     game_level_2()
+                    button.clicked = False
 
             if button.name == 'button_number3.png':
                 if button.clicked:
                     game_level_3()
+                    button.clicked = False
 
             if button.name == 'button_number4.png':
                 if button.clicked:
                     game_level_4()
+                    button.clicked = False
 
-            if button.name == 'buttc on_number5.png':
+            if button.name == 'button_number5.png':
                 if button.clicked:
                     game_level_5()
+                    button.clicked = False
+
             if button.name == 'button_number6.png':
                 if button.clicked:
                     game_level_6()
+                    button.clicked = False
             
 
         button_group.update(mouse_x, mouse_y, click)
@@ -898,7 +917,7 @@ def game_level_1():
     balloon_group.empty()
     arrow_group.empty()
 
-    mouse_arrow_testing(False)
+    mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_balloons(15)
@@ -972,7 +991,7 @@ def game_level_2():
     balloon_group.empty()
     arrow_group.empty()
 
-    mouse_arrow_testing(False)
+    mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_random_balloons(15)
@@ -1044,7 +1063,7 @@ def game_level_3():
     arrow_group.empty()
     butterfree_group.empty()
 
-    mouse_arrow_testing(False)
+    mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_butterfree(15)
@@ -1099,7 +1118,7 @@ def game_level_3():
         arrow_group.draw(screen)
 
         if go_next_next_level(butterfree_group):
-            state.level3 = True
+            state.level4 = True
             running = False
   
         if check_game_over(archer, arrow_group, butterfree_group):
@@ -1123,7 +1142,7 @@ def game_level_4():
     arrow_group.empty()
     target_group.empty()
 
-    mouse_arrow_testing(False)
+    mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     target = Target()
@@ -1203,18 +1222,19 @@ def game_level_5():
     bridge_count = 0
     tick_count = 0
     print('level 5')
-    
+        
     archer_group.empty()
     balloon_group.empty()
     arrow_group.empty()
     bridge_group.empty()
     slime_group.empty()
 
-    mouse_arrow_testing(False)
+    mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_bridges(bridge_group)
     slime_count = settings.SLIME_SPAWN_NUMBER
+    easter_egg = random.randint(0,slime_count -1)
 
 
     while running:
@@ -1242,6 +1262,7 @@ def game_level_5():
 
                 if event.key == K_ESCAPE:
                     running = False
+                    state.level5 = False
 
                     
             if event.type == KEYUP:
@@ -1255,7 +1276,7 @@ def game_level_5():
         
 
         if tick_count > 500:
-            slime_count = create_slimes(slime_group,slime_count)
+            slime_count = create_slimes(slime_group,slime_count,easter_egg)
         
   
         archer_group.update()
@@ -1308,7 +1329,7 @@ def game_level_6():
     bridge_group.empty()
     roman_group.empty()
 
-    mouse_arrow_testing(False)
+    mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_bridges(bridge_group)
@@ -1379,9 +1400,9 @@ def game_level_6():
             if tick_count > 700:
                 state.level7 = True
                 running = False
-  
-        if game_over_colission(archer_group,roman_group):
-            if state.level6:
+
+        if game_over_colission(archer_group, roman_group):
+            if state.level7:
                 pass
             else:
                 state.level6 = False

@@ -62,6 +62,13 @@ SLIME_DEATH = ['Assets/slime/slime_death1.png',
 'Assets/slime/slime_death5.png'
 ]
 
+SLIME_EASTER_EGG = ['Assets/slime/slime_easter_egg1.png',
+'Assets/slime/slime_easter_egg2.png',
+'Assets/slime/slime_easter_egg3.png',
+'Assets/slime/slime_easter_egg4.png',
+'Assets/slime/slime_easter_egg5.png'
+]
+
 SLIME_SPEED = 9
 SLIME_ANIMATION_SPEED = 0.2
 SLIME_DEATH_ANIMATION_SPEED = 0.11
@@ -93,7 +100,7 @@ ROMAN_DEATH = ['Assets/roman/roman_dying1.png',
 ROMAN_SPEED = 5
 ROMAN_ANIMATION_SPEED = 0.15
 ROMAN_DEATH_ANIMATION_SPEED = 0.17
-ROMAN_SPAWN_NUMBER = 45
+ROMAN_SPAWN_NUMBER = 70
 
 
 
