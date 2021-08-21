@@ -302,14 +302,14 @@ class Slime(pygame.sprite.Sprite):
 
         for image in settings.SLIME:
             convert_image = pygame.image.load(image).convert_alpha()
-            convert_image = pygame.transform.scale(convert_image,(70 , 70))
+            convert_image = pygame.transform.scale(convert_image,(120 , 120))
             self.slime_images.append(convert_image)
 
         self.dead_images = []
 
         for image in settings.SLIME_DEATH:
             convert_image = pygame.image.load(image).convert_alpha()
-            convert_image = pygame.transform.scale(convert_image,(70 , 70))
+            convert_image = pygame.transform.scale(convert_image,(120 , 120))
             self.dead_images.append(convert_image)
 
         
@@ -325,7 +325,7 @@ class Slime(pygame.sprite.Sprite):
         slime_mask = pygame.mask.from_surface(self.image)
 
     def kill_off_screen(self):
-        if self.rect[0] < -100:
+        if self.rect[0] <= -200:
             self.kill()
 
 
@@ -337,6 +337,7 @@ class Slime(pygame.sprite.Sprite):
 
         if self.dead:
             if self.current_image >= len(self.dead_images):
+                self.current_image = len(self.dead_images)-1
                 self.kill()
             self.image = self.dead_images[int(self.current_image)]
         
@@ -346,8 +347,11 @@ class Slime(pygame.sprite.Sprite):
             self.image = self.slime_images[int(self.current_image)]
         
         self.kill_off_screen()
-        self.slime_position += self.speed
-        self.rect[0] = self.slime_position       
+        if self.dead:
+            pass
+        else:
+            self.slime_position[0] += self.speed
+        self.rect[0] = self.slime_position[0]
 
 
 
@@ -501,12 +505,29 @@ def check_enemy_hit(arrow_group, balloon_group):
                     balloon.popped = True
 
 def check_slime_hit(arrow_group, slime_group):
-    if pygame.sprite.groupcollide(arrow_group, slime_group, False, False, \
-        pygame.sprite.collide_mask):
-        print('collision')
+    result = pygame.sprite.groupcollide(arrow_group, slime_group, False, False, \
+        pygame.sprite.collide_mask)
+    if len(result) > 0:
+        for arrow,slime_list in result.items():
+            for slime in slime_list:
+                if slime.dead: 
+                    pass
+                else:
+                    arrow.kill()
+                    slime.dead = True
+                    slime.current_image = 0
+        
         return True
     else:
         return False
+    
+def game_over_colission(player_group, enemy_group):
+    if pygame.sprite.groupcollide(player_group, enemy_group, False, False, \
+        pygame.sprite.collide_mask):
+        return True
+    else:
+        return False
+    
 
 def check_target_center_hit(arrow_group, target_group):
     result = pygame.sprite.groupcollide(arrow_group, target_group, False, False, \
@@ -549,64 +570,19 @@ def create_bridges(bridge_group):
         bridge = Bridge(900+(250*i),200*i)
         bridge_group.add(bridge)
 
-def no_collide_slime_generation(slime_group, bridge_number, a, b):
-    bad_random = True
-    any_colision = 0
-    while bad_random:
-        random_int = random.randint(a,b)
-        for slime in slime_group:
-            if slime.rect.colliderect(random_int,bridge_number*200 + 140 -slime.rect[3],\
-                slime.rect[2], slime.rect[3]):
-                    any_colision += 1
-                
-        if any_colision == 0:
-            bad_random = False
-    
-    return random_int
-            
-            
+def create_slimes(slime_group, slime_number):
+ 
+    if slime_number > 0:
+        while len(slime_group) <= 7:
+            new_slime = Slime(random.randint(1300,2000),random.randint(0,4))
+            if pygame.sprite.spritecollide(new_slime, slime_group, False):
+                new_slime.kill()
+            else:
+                slime_group.add(new_slime)
+                slime_number -= 1
+                print(slime_number)
 
-
-def create_slimes(slime_group):
-    multiplier = 0
-    for i in range (39):
-        if 0 <= i <= 9: 
-            multiplier = 600
-            slime_bridge = random.randint(0,3)
-            new_slime = Slime(no_collide_slime_generation(slime_group, slime_bridge,\
-                600+multiplier,800+multiplier),slime_bridge)
-        
-        if 10 <= i <= 19: 
-            multiplier = 1200
-            slime_bridge = random.randint(0,3)
-            new_slime = Slime(no_collide_slime_generation(slime_group, slime_bridge,\
-                1400+multiplier,2000+multiplier),slime_bridge)
-
-        if 20 <= i <= 29: 
-            multiplier = 1800
-            slime_bridge = random.randint(0,3)
-            new_slime = Slime(no_collide_slime_generation(slime_group, slime_bridge,\
-                1400+multiplier,2000+multiplier),slime_bridge)
-
-        if 20 <= i <= 29: 
-            multiplier = 2400
-            slime_bridge = random.randint(0,3)
-            new_slime = Slime(no_collide_slime_generation(slime_group, slime_bridge,\
-                1400+multiplier,2000+multiplier),slime_bridge)
-        
-        if 30 <= i <= 39: 
-            multiplier = 2400
-            slime_bridge = random.randint(0,3)
-            new_slime = Slime(no_collide_slime_generation(slime_group, slime_bridge,\
-                1400+multiplier,2000+multiplier),slime_bridge)
-
-        if 40 <= i <= 49: 
-            multiplier = 3000
-            slime_bridge = random.randint(0,3)
-            new_slime = Slime(no_collide_slime_generation(slime_group, slime_bridge,\
-                1400+multiplier,2000+multiplier),slime_bridge)
-
-        slime_group.add(new_slime)
+    return slime_number
     
 
 def mouse_arrow_testing(boolean):
@@ -639,7 +615,6 @@ def check_game_over(player, arrow_group, enemy_group):
         for enemy in enemy_group:
             if enemy.popped:
                 popped_enemies = 1
-                print(popped_enemies,'>=', len(enemy_group))
             if popped_enemies >= len(enemy_group):
                 return False
         return True
@@ -946,7 +921,7 @@ def game_level_2():
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
 
-        check_slime_hit(arrow_group, slime_group)
+        check_enemy_hit(arrow_group, balloon_group)
         draw_sprites(screen)
   
         if go_next_next_level(balloon_group):
@@ -972,6 +947,7 @@ def game_level_3():
     archer_group.empty()
     balloon_group.empty()
     arrow_group.empty()
+    butterfree_group.empty()
 
     mouse_arrow_testing(False)
     archer = Archer()
@@ -979,7 +955,6 @@ def game_level_3():
     create_butterfree(15)
 
     while running:
-        print('entrei while')
         clock.tick(settings.CLOCK)
         
         for event in pygame.event.get():
@@ -1130,12 +1105,12 @@ def game_level_5():
     running = True
     bridge_done = False
     bridge_count = 0
+    tick_count = 0
     print('level 5')
     
     archer_group.empty()
     balloon_group.empty()
     arrow_group.empty()
-    button_group.empty()
     bridge_group.empty()
     slime_group.empty()
 
@@ -1143,11 +1118,11 @@ def game_level_5():
     archer = Archer()
     archer_group.add(archer)
     create_bridges(bridge_group)
+    slime_count = 40
 
 
     while running:
         clock.tick(settings.CLOCK)
-        print(slime_group)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -1181,6 +1156,11 @@ def game_level_5():
 
         blit_game_static_elements(screen)
 
+        
+
+        if tick_count > 500:
+            slime_count = create_slimes(slime_group,slime_count)
+        
   
         archer_group.update()
         butterfree_group.update()
@@ -1189,41 +1169,33 @@ def game_level_5():
         slime_group.update()
         
         
-        if bridge_count < len(bridge_group):
-            for bridge in bridge_group:
-                if bridge.done:
-                    bridge_count += 1
-        if bridge_count == len(bridge_group):
-            create_slimes(slime_group)
-            bridge_count += 1
 
-
-
-
+        bridge_group.draw(screen)
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
-        screen.blit(arrow_count_label,(1305, 27))
 
-        check_enemy_hit(arrow_group,slime_group)
+        check_slime_hit(arrow_group,slime_group)
         
         archer_group.draw(screen)
         arrow_group.draw(screen)
-        bridge_group.draw(screen)
+        slime_group.draw(screen)
+        screen.blit(ARROW_COUNT_MENU, ( settings.SCREEN_WIDTH - ARROW_COUNT_MENU.get_width(), 0))
         screen.blit(arrow_count_label,(1305, 27))
 
 
         if go_next_next_level(slime_group):
-            if pygame.time.get_ticks() > 12000:
+            if tick_count > 700:
                 state.level6 = True
                 running = False
   
-        if check_game_over(archer, arrow_group, butterfree_group):
+        if game_over_colission(archer_group,slime_group):
             if state.level6:
                 pass
             else:
-                if pygame.time.get_ticks() > 12000:
+                if tick_count > 700:
                     game_over()
                     running = False
 
+        tick_count += 1
         pygame.display.update()
 
 

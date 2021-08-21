@@ -62,9 +62,9 @@ SLIME_DEATH = ['Assets/slime/slime_death1.png',
 'Assets/slime/slime_death5.png'
 ]
 
-SLIME_SPEED = 3
+SLIME_SPEED = 5
 SLIME_ANIMATION_SPEED = 0.2
-SLIME_DEATH_ANIMATION_SPEED = 0.15
+SLIME_DEATH_ANIMATION_SPEED = 0.11
 
 BRIDGE = 'Assets/textures/wood_floor_bridge.png'
 BRIDGE_SPEED = 2.4
