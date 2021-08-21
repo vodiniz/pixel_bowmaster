@@ -62,9 +62,41 @@ SLIME_DEATH = ['Assets/slime/slime_death1.png',
 'Assets/slime/slime_death5.png'
 ]
 
-SLIME_SPEED = 5
+SLIME_SPEED = 9
 SLIME_ANIMATION_SPEED = 0.2
 SLIME_DEATH_ANIMATION_SPEED = 0.11
+SLIME_SPAWN_NUMBER = 60
+
+ROMAN = ['Assets/roman/roman_walking1.png',
+'Assets/roman/roman_walking2.png',
+'Assets/roman/roman_walking3.png',
+'Assets/roman/roman_walking4.png'
+]
+
+
+ROMAN_DEATH = ['Assets/roman/roman_dying1.png',
+'Assets/roman/roman_dying2.png',
+'Assets/roman/roman_dying3.png',
+'Assets/roman/roman_dying4.png',
+'Assets/roman/roman_dying5.png',
+'Assets/roman/roman_dying6.png',
+'Assets/roman/roman_dying7.png',
+'Assets/roman/roman_dying8.png',
+'Assets/roman/roman_dying9.png',
+'Assets/roman/roman_dying10.png',
+'Assets/roman/roman_dying11.png',
+'Assets/roman/roman_dying12.png',
+'Assets/roman/roman_dying13.png'
+
+]
+
+ROMAN_SPEED = 5
+ROMAN_ANIMATION_SPEED = 0.15
+ROMAN_DEATH_ANIMATION_SPEED = 0.17
+ROMAN_SPAWN_NUMBER = 45
+
+
+
 
 BRIDGE = 'Assets/textures/wood_floor_bridge.png'
 BRIDGE_SPEED = 2.4
@@ -166,6 +198,8 @@ GAME_OVER = [
 'Assets/menu/game_over/game_over_32.png',\
 'Assets/menu/game_over/game_over_33.png'
 ]
+
+
 
 STATIC_GAME_OVER =  'Assets/menu/game_over/game_over.png'
 GAME_OVER_ANIMATION_SPEED = 0.3

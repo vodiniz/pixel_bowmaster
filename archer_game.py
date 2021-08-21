@@ -353,6 +353,67 @@ class Slime(pygame.sprite.Sprite):
             self.slime_position[0] += self.speed
         self.rect[0] = self.slime_position[0]
 
+    
+class Roman(pygame.sprite.Sprite):
+
+    def __init__(self,xpos, bridge):
+        pygame.sprite.Sprite.__init__(self)
+        self.roman_images = []
+
+        for image in settings.ROMAN:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(200 , 200))
+            self.roman_images.append(convert_image)
+
+        self.dead_images = []
+
+        for image in settings.ROMAN_DEATH:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(200 , 200))
+            self.dead_images.append(convert_image)
+
+        
+        self.speed = -settings.ROMAN_SPEED
+        self.current_image = 0
+        self.image = self.roman_images[self.current_image]
+        self.rect = self.image.get_rect()
+        self.dead = False
+
+        self.roman_position = [xpos, bridge*200 + 180 -self.rect[3]]
+        self.rect[0] = self.roman_position[0]
+        self.rect[1] = self.roman_position[1]
+        self.health = 2
+        roman_mask = pygame.mask.from_surface(self.image)
+
+    def kill_off_screen(self):
+        if self.rect[0] <= -200:
+            self.kill()
+
+
+    def update(self):
+        if self.dead:
+            self.current_image += settings.ROMAN_DEATH_ANIMATION_SPEED
+        else:
+            self.current_image += settings.ROMAN_ANIMATION_SPEED
+
+        if self.dead:
+            if self.current_image >= len(self.dead_images):
+                self.current_image = len(self.dead_images)-1
+                self.kill()
+            self.image = self.dead_images[int(self.current_image)]
+        
+        else:
+            if self.current_image >= len(self.roman_images):
+                self.current_image = 0
+            self.image = self.roman_images[int(self.current_image)]
+        
+        self.kill_off_screen()
+        if self.dead:
+            pass
+        else:
+            self.roman_position[0] += self.speed
+        self.rect[0] = self.roman_position[0]
+
 
 
         
@@ -504,7 +565,7 @@ def check_enemy_hit(arrow_group, balloon_group):
                 if arrow_tip < balloon_middle:
                     balloon.popped = True
 
-def check_slime_hit(arrow_group, slime_group):
+def check_simple_collision(arrow_group, slime_group):
     result = pygame.sprite.groupcollide(arrow_group, slime_group, False, False, \
         pygame.sprite.collide_mask)
     if len(result) > 0:
@@ -520,6 +581,21 @@ def check_slime_hit(arrow_group, slime_group):
         return True
     else:
         return False
+
+def check_roman_collision(arrow_group, roman_group):
+    result = pygame.sprite.groupcollide(arrow_group, roman_group, False, False, \
+        pygame.sprite.collide_mask)
+    if len(result) > 0:
+        for arrow,roman_list in result.items():
+            for roman in roman_list:
+                if roman.dead: 
+                    pass
+                else:
+                    roman.health -= 1
+                    arrow.kill()
+                    if roman.health == 0:
+                        roman.dead = True
+                        roman.current_image = 0
     
 def game_over_colission(player_group, enemy_group):
     if pygame.sprite.groupcollide(player_group, enemy_group, False, False, \
@@ -574,15 +650,28 @@ def create_slimes(slime_group, slime_number):
  
     if slime_number > 0:
         while len(slime_group) <= 7:
-            new_slime = Slime(random.randint(1300,2000),random.randint(0,4))
+            new_slime = Slime(random.randint(1300,2000),random.randint(0,3))
             if pygame.sprite.spritecollide(new_slime, slime_group, False):
                 new_slime.kill()
             else:
                 slime_group.add(new_slime)
                 slime_number -= 1
-                print(slime_number)
 
     return slime_number
+
+def create_romans(roman_group, roman_number):
+ 
+    if roman_number > 0:
+        while len(roman_group) <= 7:
+            new_roman = Roman(random.randint(1300,2000),random.randint(0,3))
+            if pygame.sprite.spritecollide(new_roman, roman_group, False):
+                new_roman.kill()
+            else:
+                roman_group.add(new_roman)
+                roman_number -= 1
+
+
+    return roman_number
     
 
 def mouse_arrow_testing(boolean):
@@ -688,6 +777,9 @@ def main_menu():
         if state.level5:
             game_level_5()
             state.level5 = False
+        if state.level6:
+            game_level_6()
+            state.level6 = False
 
         if state.level_selection:
             state.level_selection= False
@@ -784,9 +876,12 @@ def level_selection():
                 if button.clicked:
                     game_level_4()
 
-            if button.name == 'button_number5.png':
+            if button.name == 'buttc on_number5.png':
                 if button.clicked:
                     game_level_5()
+            if button.name == 'button_number6.png':
+                if button.clicked:
+                    game_level_6()
             
 
         button_group.update(mouse_x, mouse_y, click)
@@ -1079,7 +1174,8 @@ def game_level_4():
         screen.blit(arrow_count_label,(1305, 27))
 
         if check_target_center_hit(arrow_group, target_group):
-            print('bullseye')
+            state.level5 = True
+            running = False
         
         archer_group.draw(screen)
         target_group.draw(screen)
@@ -1118,7 +1214,7 @@ def game_level_5():
     archer = Archer()
     archer_group.add(archer)
     create_bridges(bridge_group)
-    slime_count = 40
+    slime_count = settings.SLIME_SPAWN_NUMBER
 
 
     while running:
@@ -1173,7 +1269,7 @@ def game_level_5():
         bridge_group.draw(screen)
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
 
-        check_slime_hit(arrow_group,slime_group)
+        check_simple_collision(arrow_group,slime_group)
         
         archer_group.draw(screen)
         arrow_group.draw(screen)
@@ -1191,12 +1287,110 @@ def game_level_5():
             if state.level6:
                 pass
             else:
-                if tick_count > 700:
-                    game_over()
-                    running = False
+                state.level5 = False
+                game_over()
+                running = False
 
         tick_count += 1
         pygame.display.update()
+
+
+def game_level_6():
+    running = True
+    bridge_done = False
+    bridge_count = 0
+    tick_count = 0
+    print('level 6')
+    
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+    bridge_group.empty()
+    roman_group.empty()
+
+    mouse_arrow_testing(False)
+    archer = Archer()
+    archer_group.add(archer)
+    create_bridges(bridge_group)
+    roman_count = settings.ROMAN_SPAWN_NUMBER
+
+
+    while running:
+        clock.tick(settings.CLOCK)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+
+        
+
+        if tick_count > 500:
+            roman_count = create_romans(roman_group,roman_count)
+        
+  
+        archer_group.update()
+        arrow_group.update()
+        bridge_group.update()
+        roman_group.update()
+        
+        
+
+        bridge_group.draw(screen)
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+
+        check_roman_collision(arrow_group,roman_group)
+        
+        archer_group.draw(screen)
+        arrow_group.draw(screen)
+        roman_group.draw(screen)
+        screen.blit(ARROW_COUNT_MENU, ( settings.SCREEN_WIDTH - ARROW_COUNT_MENU.get_width(), 0))
+        screen.blit(arrow_count_label,(1305, 27))
+
+
+        if go_next_next_level(roman_group):
+            if tick_count > 700:
+                state.level7 = True
+                running = False
+  
+        if game_over_colission(archer_group,roman_group):
+            if state.level6:
+                pass
+            else:
+                state.level6 = False
+                game_over()
+                running = False
+
+        tick_count += 1
+        pygame.display.update()
+
 
 
 def game_over():
@@ -1310,6 +1504,7 @@ arrow_group = pygame.sprite.Group()
 button_group = pygame.sprite.Group()
 slime_group = pygame.sprite.Group()
 bridge_group = pygame.sprite.Group()
+roman_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
 
