@@ -48,6 +48,28 @@ TARGET_SPEED = 2.5
 TARGET_ANIMATION_SPEED = 3
 
 
+SLIME = ['Assets/slime/slime1.png',
+'Assets/slime/slime2.png',
+'Assets/slime/slime3.png',
+'Assets/slime/slime4.png',
+'Assets/slime/slime5.png'
+]
+
+SLIME_DEATH = ['Assets/slime/slime_death1.png',
+'Assets/slime/slime_death2.png',
+'Assets/slime/slime_death3.png',
+'Assets/slime/slime_death4.png',
+'Assets/slime/slime_death5.png'
+]
+
+SLIME_SPEED = 3
+SLIME_ANIMATION_SPEED = 0.2
+SLIME_DEATH_ANIMATION_SPEED = 0.15
+
+BRIDGE = 'Assets/textures/wood_floor_bridge.png'
+BRIDGE_SPEED = 2.4
+
+
 CLOCK = 60
 
 MOVE_UP_KEY = pygame.K_UP
@@ -70,8 +92,38 @@ PLAY_BUTTON = ('Assets/menu/Play_button.png')
 PLAY_BUTTON_RED = ('Assets/menu/Play_button_red.png')
 PLAY_BUTTON_MULTIPLIER = 5
 PLAY_BUTTON_SIZE = ((int(55*PLAY_BUTTON_MULTIPLIER), int(20*PLAY_BUTTON_MULTIPLIER)))
-
 PLAY_BUTTON_RED = ('Assets/menu/Play_button_red.png')
+
+LEVELS = ('Assets/menu/levels.png')
+LEVELS_RED = ('Assets/menu/levels_red.png')
+
+BUTTON_BACKGROUND = ('Assets/menu/button_background.png')
+
+BUTTON_NUMBERS = [
+    ('Assets/menu/button_number/button_number1.png'),
+    ('Assets/menu/button_number/button_number2.png'),
+    ('Assets/menu/button_number/button_number3.png'),
+    ('Assets/menu/button_number/button_number4.png'),
+    ('Assets/menu/button_number/button_number5.png'),
+    ('Assets/menu/button_number/button_number6.png'),
+    ('Assets/menu/button_number/button_number7.png'),
+    ('Assets/menu/button_number/button_number8.png'),
+    ('Assets/menu/button_number/button_number9.png'),
+    ('Assets/menu/button_number/button_number10.png')
+]
+
+BUTTON_NUMBERS_RED = [
+    ('Assets/menu/button_number/button_number1_red.png'),
+    ('Assets/menu/button_number/button_number2_red.png'),
+    ('Assets/menu/button_number/button_number3_red.png'),
+    ('Assets/menu/button_number/button_number4_red.png'),
+    ('Assets/menu/button_number/button_number5_red.png'),
+    ('Assets/menu/button_number/button_number6_red.png'),
+    ('Assets/menu/button_number/button_number7_red.png'),
+    ('Assets/menu/button_number/button_number8_red.png'),
+    ('Assets/menu/button_number/button_number9_red.png'),
+    ('Assets/menu/button_number/button_number10_red.png')
+]
 
 MENU_BUTTON = ('Assets/menu/menu_text.png')
 MENU_BUTTON_RED = ('Assets/menu/menu_text_red.png')
