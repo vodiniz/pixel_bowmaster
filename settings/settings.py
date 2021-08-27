@@ -5,6 +5,9 @@ ICON = 'Assets/menu/icon.png'
 
 SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 800
+
+LANGUAGE_EN_US = True
+LANGUAGE_PT_BR = False
  
 
 ARROW_COUNT_LEVEL_1 = 15
@@ -212,5 +215,57 @@ STATIC_GAME_OVER =  'Assets/menu/game_over/game_over.png'
 GAME_OVER_ANIMATION_SPEED = 0.3
 GAME_OVER_SCALE = 9
 
+TEXT_SPEED = 0.30
+TEXT_DURATION = 5
+TEXT_COLOR = (255, 255, 255)
 
 
+LANGUAGE = 'pt'
+TICKS_PER_CHAR = 5
+TEXT_LEVELS = []
+
+TEXT_LEVEL1 = ["I guess it's quite simple, you have a bow and",\
+                "there are some balloons, let's check that aim..."]
+TEXT_LEVELS.append(TEXT_LEVEL1)
+            
+TEXT_LEVEL2 = ["Good luck ! It's quite harder"]
+TEXT_LEVELS.append(TEXT_LEVEL2)
+
+TEXT_LEVEL3 = ["Help the butterflies escape."]
+TEXT_LEVELS.append(TEXT_LEVEL3)
+
+TEXT_LEVEL4 = ["With all that training I hope you can get a bullseye."]
+TEXT_LEVELS.append(TEXT_LEVEL4)
+
+TEXT_LEVEL5 = ["Try not to get hit !"]
+TEXT_LEVELS.append(TEXT_LEVEL5)
+
+TEXT_LEVEL6 = ["Take care, a more resilient enemy is coming",\
+                "hope you can handle it!"]
+TEXT_LEVELS.append(TEXT_LEVEL6)
+
+
+
+
+TEXT_LEVELS_PT = []
+
+TEXT_LEVEL1_PT = ["É muito simples, voce tem um arco e tem",\
+                " alguns balões na tela, vamos testar essa mira..."]
+TEXT_LEVELS_PT.append(TEXT_LEVEL1_PT)
+            
+TEXT_LEVEL2_PT = ["Boa sorte, a dificuldade aumentou."]
+TEXT_LEVELS_PT.append(TEXT_LEVEL2_PT)
+
+TEXT_LEVEL3_PT = ["Ajude as borboletas escaparem!"]
+TEXT_LEVELS_PT.append(TEXT_LEVEL3_PT)
+
+TEXT_LEVEL4_PT = ["Com todo esse treinamento, eu espero que pelo.",\
+                    "menos você consiga acertar o centro do alvo..."]
+TEXT_LEVELS_PT.append(TEXT_LEVEL4_PT)
+
+TEXT_LEVEL5_PT = ["Tente não ser atingido."]
+TEXT_LEVELS_PT.append(TEXT_LEVEL5_PT)
+
+TEXT_LEVEL6_PT = ["Cuidado!!! Um inimigo mais resiliente se encontra logo",\
+                "a frente, espero que voce consiga lidar com eles!"]
+TEXT_LEVELS_PT.append(TEXT_LEVEL6_PT)

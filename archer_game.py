@@ -531,6 +531,90 @@ class Button(pygame.sprite.Sprite):
             self.clicked = False
 
  
+class Level_text(pygame.sprite.Sprite):
+    def __init__(self,text_list,myfont):
+        pygame.sprite.Sprite.__init__(self)
+        self.font = myfont
+        self.text_color = settings.TEXT_COLOR
+        self.current_char = 0
+        self.text_speed = settings.TEXT_SPEED
+        self.text_duration = settings.TEXT_DURATION
+        self.text_list = text_list
+        self.char_lenght = 0
+        self.second_word = False
+        self.showing_text = []
+        for text in text_list:
+            self.char_lenght += len(text)
+
+        self.image = pygame.image.load(settings.BUTTON_BACKGROUND).convert()
+        self.background_label = pygame.image.load(settings.BUTTON_BACKGROUND).convert()
+        if len(self.text_list) > 1:
+            self.image = pygame.transform.scale(self.image, (900,100))
+            self.background_label = pygame.transform.scale(self.background_label, (900,100))
+        else:
+            self.image = pygame.transform.scale(self.image, (900,70))
+            self.background_label = pygame.transform.scale(self.background_label, (900,70))
+
+        for text in self.text_list:
+            self.showing_text.append('')
+        self.rect = self.image.get_rect()
+        self.rect[0] = settings.SCREEN_WIDTH/2 - self.rect[2]/2
+        self.rect[1] = 30
+
+    def update(self,tick_count):
+        
+        if len(self.text_list) > 1:
+            if not self.second_word:
+                if self.current_char > len(self.text_list[0]):
+                    self.current_char = 0
+                    self.second_word = True
+                elif len(self.showing_text[0]) <= self.current_char:# and current_char <= len(self.text_list[0]):
+                    self.showing_text[0] += self.text_list[0][int(self.current_char)]
+                
+                self.current_char += self.text_speed
+
+            else:
+                if self.current_char > len(self.text_list[1]):
+                    self.current_char = 0
+                    self.second_word = True
+                elif len(self.showing_text[1]) <= self.current_char:
+                    self.showing_text[1] += self.text_list[1][int(self.current_char)]
+
+                
+                self.current_char += self.text_speed
+            
+            self.image.blit(self.background_label,(0,0))
+
+            rendered_text = self.font.render(self.showing_text[0], 1, self.text_color)
+            self.image.blit(rendered_text,(self.rect[2]/2 - rendered_text.get_width()/2,25))
+           
+            rendered_text2 = self.font.render(self.showing_text[1], 1, self.text_color)
+            self.image.blit(rendered_text2,(self.rect[2]/2 - rendered_text2.get_width()/2,\
+             35 + rendered_text.get_height()))
+        
+            if tick_count > settings.TICKS_PER_CHAR * len(self.text_list[0] + self.text_list[1]):
+                self.kill()
+
+        else:
+            if self.current_char > len(self.text_list[0]):
+                pass
+            elif len(self.showing_text[0]) <= self.current_char:
+                self.showing_text[0] += self.text_list[0][int(self.current_char)]
+            
+            self.current_char += self.text_speed
+            self.image.blit(self.background_label,(0,0))
+
+            rendered_text = self.font.render(self.showing_text[0], 1, self.text_color)
+            self.image.blit(rendered_text,(self.rect[2]/2 - rendered_text.get_width()/2,\
+                self.rect[3]/2 - rendered_text.get_height()/2))
+
+            if tick_count > settings.TICKS_PER_CHAR * 1.3 * len(self.text_list[0]):
+                self.kill()
+
+
+
+
+
 class State:
     def __init__(self):
         self.menu = False
@@ -815,6 +899,11 @@ def main_menu():
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                    click = True 
+            
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+
 
         button_group.update(mouse_x, mouse_y, click)
         button_group.draw(screen)
@@ -867,6 +956,11 @@ def level_selection():
                 if event.button == 1:
                     click = True 
 
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+                    state.level_selection = False
+
         if menu_button.clicked:
             print('go to menu')
             running = False
@@ -912,15 +1006,19 @@ def level_selection():
 
 def game_level_1():
     running = True
+    tick_count = 0
 
     archer_group.empty()
     balloon_group.empty()
     arrow_group.empty()
+    level_text_group.empty()
 
     mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_balloons(15)
+    level_text1 = Level_text(texts[0], text_font)
+    level_text_group.add(level_text1)
     while running:
         clock.tick(settings.CLOCK)
 
@@ -947,6 +1045,7 @@ def game_level_1():
 
                 if event.key == K_ESCAPE:
                     running = False
+                    state.level1 = False
 
                     
             if event.type == KEYUP:
@@ -958,12 +1057,14 @@ def game_level_1():
         
         blit_game_static_elements(screen)
         update_sprites()
+        level_text_group.update(tick_count)
 
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
         
         check_enemy_hit(arrow_group,balloon_group)
         draw_sprites(screen)
+        level_text_group.draw(screen)
   
 
         if go_next_next_level(balloon_group):
@@ -975,26 +1076,32 @@ def game_level_1():
                 pass
             else:
                 game_over()
-            running = False
+                state.level4 = False
+                running = False
 
 
         
-
+        tick_count += 1
         pygame.display.update()
 
 
 def game_level_2():
     running = True
+    tick_count = 0
     print('level 2')
 
     archer_group.empty()
     balloon_group.empty()
     arrow_group.empty()
+    level_text_group.empty()
 
     mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_random_balloons(15)
+
+    level_text1 = Level_text(texts[1], text_font)
+    level_text_group.add(level_text1)
 
     while running:
         clock.tick(settings.CLOCK)
@@ -1021,6 +1128,7 @@ def game_level_2():
 
                 if event.key == K_ESCAPE:
                     running = False
+                    state.level2 = False
 
                     
             if event.type == KEYUP:
@@ -1031,12 +1139,14 @@ def game_level_2():
 
         blit_game_static_elements(screen)
         update_sprites()
+        level_text_group.update(tick_count)
         
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
 
         check_enemy_hit(arrow_group, balloon_group)
         draw_sprites(screen)
+        level_text_group.draw(screen)
   
         if go_next_next_level(balloon_group):
             state.level3 = True
@@ -1047,14 +1157,16 @@ def game_level_2():
                 pass
             else:
                 game_over()
-            running = False
+                running = False
+                state.level2 = False
 
-        
+        tick_count += 1
         pygame.display.update()
 
 
 def game_level_3():
     running = True
+    tick_count = 0
     print('level 3')
 
     
@@ -1062,11 +1174,14 @@ def game_level_3():
     balloon_group.empty()
     arrow_group.empty()
     butterfree_group.empty()
+    level_text_group.empty()
 
     mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     create_butterfree(15)
+    level_text3 = Level_text(texts[2], text_font)
+    level_text_group.add(level_text3)
 
     while running:
         clock.tick(settings.CLOCK)
@@ -1094,6 +1209,7 @@ def game_level_3():
 
                 if event.key == K_ESCAPE:
                     running = False
+                    state.level3 = False
 
                     
             if event.type == KEYUP:
@@ -1107,7 +1223,8 @@ def game_level_3():
         archer_group.update()
         butterfree_group.update()
         arrow_group.update()
-        
+        level_text_group.update(tick_count)
+
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
 
@@ -1116,6 +1233,7 @@ def game_level_3():
         archer_group.draw(screen)
         butterfree_group.draw(screen)
         arrow_group.draw(screen)
+        level_text_group.draw(screen)
 
         if go_next_next_level(butterfree_group):
             state.level4 = True
@@ -1126,14 +1244,17 @@ def game_level_3():
                 pass
             else:
                 game_over()
-            running = False
+                state.level3 = False
+                running = False
 
+        tick_count += 1
         pygame.display.update()
 
 
 
 def game_level_4():
     running = True
+    tick_count = 0
     print('level 4')
 
     
@@ -1141,12 +1262,15 @@ def game_level_4():
     balloon_group.empty()
     arrow_group.empty()
     target_group.empty()
+    level_text_group.empty()
 
     mouse_arrow_testing(state.testing)
     archer = Archer()
     archer_group.add(archer)
     target = Target()
     target_group.add(target)
+    level_text4 = Level_text(texts[3], text_font)
+    level_text_group.add(level_text4)
 
 
     while running:
@@ -1175,6 +1299,7 @@ def game_level_4():
 
                 if event.key == K_ESCAPE:
                     running = False
+                    state.level4 = False
 
                     
             if event.type == KEYUP:
@@ -1188,6 +1313,7 @@ def game_level_4():
         archer_group.update()
         target_group.update()
         arrow_group.update()
+        level_text_group.update(tick_count)
         
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
@@ -1199,21 +1325,24 @@ def game_level_4():
         archer_group.draw(screen)
         target_group.draw(screen)
         arrow_group.draw(screen)
+        level_text_group.draw(screen)
   
 
         if go_next_next_level(target_group):
             state.level5 = True
             running = False
 
-        if check_game_over(archer, arrow_group, target_group):
+        if archer.arrows == 0 and len(arrow_group) == 0:
             if state.level5:
                 pass
             else:
                 game_over()
-            running = False
+                state.level4 = False
+                running = False
 
        
         pygame.display.update()
+        tick_count += 1
 
 
 def game_level_5():
@@ -1228,6 +1357,7 @@ def game_level_5():
     arrow_group.empty()
     bridge_group.empty()
     slime_group.empty()
+    level_text_group.empty()
 
     mouse_arrow_testing(state.testing)
     archer = Archer()
@@ -1235,6 +1365,9 @@ def game_level_5():
     create_bridges(bridge_group)
     slime_count = settings.SLIME_SPAWN_NUMBER
     easter_egg = random.randint(0,slime_count -1)
+
+    level_text5 = Level_text(texts[4], text_font)
+    level_text_group.add(level_text5)
 
 
     while running:
@@ -1284,6 +1417,7 @@ def game_level_5():
         arrow_group.update()
         bridge_group.update()
         slime_group.update()
+        level_text_group.update(tick_count)
         
         
 
@@ -1297,6 +1431,7 @@ def game_level_5():
         slime_group.draw(screen)
         screen.blit(ARROW_COUNT_MENU, ( settings.SCREEN_WIDTH - ARROW_COUNT_MENU.get_width(), 0))
         screen.blit(arrow_count_label,(1305, 27))
+        level_text_group.draw(screen)
 
 
         if go_next_next_level(slime_group):
@@ -1334,6 +1469,8 @@ def game_level_6():
     archer_group.add(archer)
     create_bridges(bridge_group)
     roman_count = settings.ROMAN_SPAWN_NUMBER
+    level_text6 = Level_text(texts[5], text_font)
+    level_text_group.add(level_text6)
 
 
     while running:
@@ -1361,6 +1498,7 @@ def game_level_6():
 
                 if event.key == K_ESCAPE:
                     running = False
+                    state.level6 = False
 
                     
             if event.type == KEYUP:
@@ -1381,7 +1519,7 @@ def game_level_6():
         arrow_group.update()
         bridge_group.update()
         roman_group.update()
-        
+        level_text_group.update(tick_count)
         
 
         bridge_group.draw(screen)
@@ -1394,6 +1532,7 @@ def game_level_6():
         roman_group.draw(screen)
         screen.blit(ARROW_COUNT_MENU, ( settings.SCREEN_WIDTH - ARROW_COUNT_MENU.get_width(), 0))
         screen.blit(arrow_count_label,(1305, 27))
+        level_text_group.draw(screen)
 
 
         if go_next_next_level(roman_group):
@@ -1476,6 +1615,7 @@ pygame.display.set_caption(settings.WINDOW_NAME)
 
 
 myfont = pygame.font.Font(settings.PIXEL_FONT, 50)
+text_font = pygame.font.Font(settings.PIXEL_FONT, 25)
 
 screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
 icon = pygame.image.load(settings.ICON).convert_alpha()
@@ -1511,6 +1651,13 @@ STATIC_GAME_OVER = pygame.image.load(settings.STATIC_GAME_OVER).convert_alpha()
 STATIC_GAME_OVER = pygame.transform.scale(STATIC_GAME_OVER,\
     ((int(settings.GAME_OVER_SCALE*STATIC_GAME_OVER.get_width()),\
         int(settings.GAME_OVER_SCALE*STATIC_GAME_OVER.get_height()))))
+language = settings.LANGUAGE
+
+if language == 'pt':
+    texts = settings.TEXT_LEVELS_PT
+else:
+    texts = settings.TEXT_LEVELS
+
 
 state = State()
 
@@ -1526,6 +1673,7 @@ button_group = pygame.sprite.Group()
 slime_group = pygame.sprite.Group()
 bridge_group = pygame.sprite.Group()
 roman_group = pygame.sprite.Group()
+level_text_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
 
