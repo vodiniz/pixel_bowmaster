@@ -1,6 +1,4 @@
 import pygame, random
-
-from pygame.cursors import arrow
 from settings import settings
 from pygame.locals import *
 
@@ -415,6 +413,45 @@ class Roman(pygame.sprite.Sprite):
         self.rect[0] = self.roman_position[0]
 
 
+class Clouds(pygame.sprite.Sprite):
+
+    def __init__(self,ypos,positive_speed):
+        pygame.sprite.Sprite.__init__(self)
+        
+        self.cloud_images = []
+
+        for image in settings.CLOUD:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(50, 130))
+            self.cloud_images.append(convert_image)
+    
+        self.current_image = 0
+        self.image = self.cloud_images[self.current_image]
+ 
+        if positive_speed:  
+            self.speed = settings.CLOUD_SPEED
+        else:
+            self.speed = -settings.CLOUD_SPEED
+
+        self.cloud_position = [500,ypos]
+
+        self.rect = self.image.get_rect()
+        self.rect[0], self.rect[1] = self.cloud_position
+        cloud_mask = pygame.mask.from_surface(self.image)
+
+
+    def update(self):
+        self.current_image += 0
+        
+        if self.current_image >= len(self.cloud_images):
+            self.current_image = 0
+        self.image = self.cloud_images[int(self.current_image)]
+
+        if self.rect[1] <= 0 or self.rect[1] >= 800 - self.rect[3]:
+            self.speed = -self.speed
+        self.cloud_position[1] -= self.speed
+        self.rect[1] = self.cloud_position[1]
+        
 
         
 class Bridge(pygame.sprite.Sprite):
@@ -612,9 +649,6 @@ class Level_text(pygame.sprite.Sprite):
                 self.kill()
 
 
-
-
-
 class State:
     def __init__(self):
         self.menu = False
@@ -682,6 +716,7 @@ def check_roman_collision(arrow_group, roman_group):
                         roman.dead = True
                         roman.current_image = 0
     
+
 def game_over_colission(player_group, enemy_group):
     if pygame.sprite.groupcollide(player_group, enemy_group, False, False, \
         pygame.sprite.collide_mask):
@@ -706,6 +741,19 @@ def check_target_center_hit(arrow_group, target_group):
                     if arrow_tip_x + 20 > target.rect[0] + (1/3)*target.rect[2] and arrow_tip_x< 1330 :
                         return True
         
+
+def check_cloud_collision(arrow_group, cloud_group):
+    result = pygame.sprite.groupcollide(arrow_group, cloud_group, False, False, \
+        pygame.sprite.collide_mask)
+    if len(result) > 0:
+        for arrow,cloud_list in result.items():
+            arrow_tip = arrow.rect[0] + (3/4)*arrow.rect[2]
+            print(arrow_tip)
+            if arrow_tip > 555:
+                pass
+            else:
+                print('collision')
+                arrow.kill()
 
 
 def create_balloons(balloon_number):
@@ -756,8 +804,8 @@ def create_slimes(slime_group, slime_number,easter_egg):
 def create_romans(roman_group, roman_number):
  
     if roman_number > 0:
-        while len(roman_group) <= 7:
-            new_roman = Roman(random.randint(1300,2000),random.randint(0,3))
+        while len(roman_group) <= 6:
+            new_roman = Roman(random.randint(1300,2300),random.randint(0,3))
             if pygame.sprite.spritecollide(new_roman, roman_group, False):
                 new_roman.kill()
             else:
@@ -766,7 +814,13 @@ def create_romans(roman_group, roman_number):
 
 
     return roman_number
-    
+
+def create_clouds(cloud_group):
+    cloud_1 = Clouds(random.randint(0,100), True)
+    cloud_group.add(cloud_1)
+    cloud_2 = Clouds(random.randint(500,600), False)
+    cloud_group.add(cloud_2)
+
 
 def mouse_arrow_testing(boolean):
     if boolean:
@@ -803,6 +857,10 @@ def check_game_over(player, arrow_group, enemy_group):
         return True
     else:
         return False
+
+def recreate_testing_arrow(arrow_group):
+    if len(arrow_group) == 0:
+        mouse_arrow_testing(True)
 
 def go_next_next_level(enemy_group):
     if len(enemy_group) == 0:
@@ -875,6 +933,23 @@ def main_menu():
         if state.level6:
             game_level_6()
             state.level6 = False
+
+        if state.level7:
+            game_level_7()
+            state.level7 = False
+
+        if state.level8:
+            #game_level_8()
+            state.level8 = False
+
+        if state.level9:
+            #game_level_9()
+            state.level9 = False
+
+        if state.level10:
+            #game_level_10()
+            state.level10 = False
+        
 
         if state.level_selection:
             state.level_selection= False
@@ -994,6 +1069,10 @@ def level_selection():
             if button.name == 'button_number6.png':
                 if button.clicked:
                     game_level_6()
+                    button.clicked = False
+            if button.name == 'button_number7.png':
+                if button.clicked:
+                    game_level_7()
                     button.clicked = False
             
 
@@ -1240,7 +1319,7 @@ def game_level_3():
             running = False
   
         if check_game_over(archer, arrow_group, butterfree_group):
-            if state.level3:
+            if state.level4:
                 pass
             else:
                 game_over()
@@ -1552,6 +1631,105 @@ def game_level_6():
         pygame.display.update()
 
 
+def game_level_7():
+    running = True
+    tick_count = 0
+    print('level 7')
+
+    
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+    butterfree_group.empty()
+    level_text_group.empty()
+    bridge_group.empty()
+    roman_group.empty()
+    slime_group.empty()
+    target_group.empty()
+
+    mouse_arrow_testing(state.testing)
+    archer = Archer()
+    archer_group.add(archer)
+    create_butterfree(15)
+    level_text7 = Level_text(texts[6], text_font)
+    level_text_group.add(level_text7)
+    create_clouds(cloud_group)
+
+
+    while running:
+        clock.tick(settings.CLOCK)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+                    state.level3 = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+
+        archer_group.update()
+        butterfree_group.update()
+        arrow_group.update()
+        cloud_group.update()
+        level_text_group.update(tick_count)
+
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+        screen.blit(arrow_count_label,(1305, 27))
+
+        check_enemy_hit(arrow_group,butterfree_group)
+        check_cloud_collision(arrow_group, cloud_group)
+
+
+        archer_group.draw(screen)
+        butterfree_group.draw(screen)
+        arrow_group.draw(screen)
+        cloud_group.draw(screen)
+        level_text_group.draw(screen)
+
+        if go_next_next_level(butterfree_group):
+            state.level8 = True
+            running = False
+  
+        if check_game_over(archer, arrow_group, butterfree_group):
+            if state.level8:
+                pass
+            else:
+                game_over()
+                state.level7 = False
+                running = False
+
+        tick_count += 1
+        pygame.display.update()
+
+
+
+
 
 def game_over():
     running = True
@@ -1607,6 +1785,7 @@ def game_over():
             state.level1 = True
         if menu_button.clicked:
             running = False
+            state.level1 = False
         pygame.display.update()
 
 
@@ -1674,6 +1853,7 @@ slime_group = pygame.sprite.Group()
 bridge_group = pygame.sprite.Group()
 roman_group = pygame.sprite.Group()
 level_text_group = pygame.sprite.Group()
+cloud_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
 

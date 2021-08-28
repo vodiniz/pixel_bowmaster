@@ -1,4 +1,5 @@
 import pygame.locals
+import random 
 
 WINDOW_NAME = 'Pixel Bowmaster'
 ICON = 'Assets/menu/icon.png'
@@ -47,7 +48,7 @@ FIRST_BUTTERFREE_DISTANCE = 600
 
 
 TARGET = ['Assets/target/target.png']
-TARGET_SPEED = 2.5
+TARGET_SPEED = round(random.uniform(2, 3.0), 1)
 TARGET_ANIMATION_SPEED = 3
 
 
@@ -103,8 +104,11 @@ ROMAN_DEATH = ['Assets/roman/roman_dying1.png',
 ROMAN_SPEED = 5
 ROMAN_ANIMATION_SPEED = 0.15
 ROMAN_DEATH_ANIMATION_SPEED = 0.17
-ROMAN_SPAWN_NUMBER = 70
+ROMAN_SPAWN_NUMBER = 60
 
+
+CLOUD = ['Assets/cloud/cloud.png']
+CLOUD_SPEED = round(random.uniform(2, 2.7), 1)
 
 
 
@@ -244,7 +248,9 @@ TEXT_LEVEL6 = ["Take care, a more resilient enemy is coming",\
                 "hope you can handle it!"]
 TEXT_LEVELS.append(TEXT_LEVEL6)
 
-
+TEXT_LEVEL7 = ['These cloud appear to be soft,',\
+                'but they are kind of misleading.']
+TEXT_LEVELS.append(TEXT_LEVEL7)
 
 
 TEXT_LEVELS_PT = []
@@ -259,7 +265,7 @@ TEXT_LEVELS_PT.append(TEXT_LEVEL2_PT)
 TEXT_LEVEL3_PT = ["Ajude as borboletas escaparem!"]
 TEXT_LEVELS_PT.append(TEXT_LEVEL3_PT)
 
-TEXT_LEVEL4_PT = ["Com todo esse treinamento, eu espero que pelo.",\
+TEXT_LEVEL4_PT = ["Com todo esse treinamento, eu espero que pelo",\
                     "menos você consiga acertar o centro do alvo..."]
 TEXT_LEVELS_PT.append(TEXT_LEVEL4_PT)
 
@@ -269,3 +275,7 @@ TEXT_LEVELS_PT.append(TEXT_LEVEL5_PT)
 TEXT_LEVEL6_PT = ["Cuidado!!! Um inimigo mais resiliente se encontra logo",\
                 "a frente, espero que voce consiga lidar com eles!"]
 TEXT_LEVELS_PT.append(TEXT_LEVEL6_PT)
+
+TEXT_LEVEL7_PT = ['Essas nuvens parecem bem macias,',\
+                'mas não se deixe enganar pela aparencia...']
+TEXT_LEVELS_PT.append(TEXT_LEVEL7_PT)
