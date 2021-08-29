@@ -1,4 +1,6 @@
 import pygame, random
+
+from pygame import mixer
 from settings import settings
 from pygame.locals import *
 
@@ -556,16 +558,51 @@ class Button(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect[0], self.rect[1] = self.position[0], self.position[1]
         self.clicked = False
+        self.audio_played = 1
+        
 
     def update(self, mouse_x, mouse_y, click):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_x, mouse_y):
             self.image = self.red_image
+            if self.audio_played:
+                button_selection.play()
+                self.audio_played = 0
             if click:
                 self.clicked = True
         else:
             self.image = self.blue_image
             self.clicked = False
+            self.audio_played = 1
+
+class Slide_button(pygame.sprite.Sprite):
+    def __init__(self,audio_bar_rect, ypos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(settings.ROTATE_BUTTON).convert()
+        self.image = pygame.transform.scale(self.image, (10, 50))
+        #self.moving = False
+        self.max_volume = 0.7
+        self.mix_volume = 0.0
+    
+        self.position = [audio_bar_rect[0] + settings.MENU_VOLUME * audio_bar_rect[2]/self.max_volume , ypos]
+
+        self.rect = self.image.get_rect()
+        self.rect[0] =  self.position[0]
+        self.rect[1] = self.position[1]
+
+    def update(self, audio_bar_rect, offset):
+        if self.rect[0] - offset < audio_bar_rect[0]:
+            self.rect[0] = audio_bar_rect[0]
+        elif self.rect[0] + offset > audio_bar_rect[0] + audio_bar_rect[2] - self.rect[2]:
+            self.rect[0] = audio_bar_rect[0] + audio_bar_rect[2] - self.rect[2]
+        else:
+            self.rect [0] = self.rect[0] + offset
+        settings.MENU_VOLUME = (self.rect[0] - audio_bar_rect[0]) * self.max_volume / audio_bar_rect[2]
+        print('({} - {}) * {} / {} = {}'.format(self.rect[0],audio_bar_rect[0],audio_bar_rect[2],self.max_volume, settings.MENU_VOLUME))
+        #print('settings volume',settings.MENU_VOLUME)
+        pygame.mixer.music.set_volume(settings.MENU_VOLUME)
+
+    
 
  
 class Level_text(pygame.sprite.Sprite):
@@ -598,7 +635,7 @@ class Level_text(pygame.sprite.Sprite):
         self.rect[0] = settings.SCREEN_WIDTH/2 - self.rect[2]/2
         self.rect[1] = 30
 
-    def update(self,tick_count):
+    def update(self,tick_count,mixer_channel):
         
         if len(self.text_list) > 1:
             if not self.second_word:
@@ -607,6 +644,10 @@ class Level_text(pygame.sprite.Sprite):
                     self.second_word = True
                 elif len(self.showing_text[0]) <= self.current_char:# and current_char <= len(self.text_list[0]):
                     self.showing_text[0] += self.text_list[0][int(self.current_char)]
+                    if mixer_channel.get_busy():
+                        pass
+                    else:
+                        text_effect.play(maxtime = int((len(self.text_list[0])/self.text_speed)*1000), fade_ms = 200)
                 
                 self.current_char += self.text_speed
 
@@ -615,7 +656,12 @@ class Level_text(pygame.sprite.Sprite):
                     self.current_char = 0
                     self.second_word = True
                 elif len(self.showing_text[1]) <= self.current_char:
+                    #text_effect.play(-1)
                     self.showing_text[1] += self.text_list[1][int(self.current_char)]
+                    if mixer_channel.get_busy():
+                        pass
+                    else:
+                        text_effect.play(maxtime = int((len(self.text_list[1])/self.text_speed)*1000 - 500), fade_ms = 200)
 
                 
                 self.current_char += self.text_speed
@@ -634,9 +680,14 @@ class Level_text(pygame.sprite.Sprite):
 
         else:
             if self.current_char > len(self.text_list[0]):
+                #mixer_channel.pause()
                 pass
             elif len(self.showing_text[0]) <= self.current_char:
                 self.showing_text[0] += self.text_list[0][int(self.current_char)]
+                if mixer_channel.get_busy():
+                    pass
+                else:
+                    text_effect.play(maxtime = int((len(self.text_list[0])/self.text_speed)*1000), fade_ms = 300)
             
             self.current_char += self.text_speed
             self.image.blit(self.background_label,(0,0))
@@ -663,8 +714,10 @@ class State:
         self.level8 = False
         self.level9 = False
         self.level10 = False
+        self.options = False
         self.game_over = False
         self.testing = False
+        
 
 
 def create_arrow_shooting(xpos, ypos):
@@ -748,7 +801,6 @@ def check_cloud_collision(arrow_group, cloud_group):
     if len(result) > 0:
         for arrow,cloud_list in result.items():
             arrow_tip = arrow.rect[0] + (3/4)*arrow.rect[2]
-            print(arrow_tip)
             if arrow_tip > 555:
                 pass
             else:
@@ -891,6 +943,15 @@ def create_level_buttons(button_group):
 
 
 
+def play_menu_music(music_file,play):
+    if play:
+        pygame.mixer.music.load(settings.MENU_MUSIC)
+        pygame.mixer.music.set_volume(settings.MENU_VOLUME) 
+        pygame.mixer.music.play(-1)
+    else:
+        pygame.mixer.music.stop()
+
+
 def main_menu():
     clock.tick(settings.CLOCK)
 
@@ -906,8 +967,18 @@ def main_menu():
     level_selection_button = Button(settings.LEVELS, settings.LEVELS_RED,\
         settings.SCREEN_WIDTH/2 , 400+ play_button.rect[3] + 10)
     button_group.add(level_selection_button)
-    
 
+    options_button = Button(settings.OPTIONS, settings.OPTIONS_RED,\
+        settings.SCREEN_WIDTH/2 , 400 + 2*play_button.rect[3] + 20)
+    button_group.add(options_button)
+
+    about_button = Button(settings.ABOUT, settings.ABOUT_RED,\
+        settings.SCREEN_WIDTH/2 , 400 + 3*play_button.rect[3] + 30)
+    button_group.add(about_button)
+
+
+    play_menu_music(settings.MENU_MUSIC, True)
+   
     
     while running:
         if state.level1:
@@ -956,6 +1027,12 @@ def main_menu():
             level_selection()
             running = False
 
+        if state.options:
+            state.options = False
+            options()
+            running = False
+
+
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
@@ -989,6 +1066,9 @@ def main_menu():
         if level_selection_button.clicked:
             level_selection_button.clicked = False
             state.level_selection = True
+        if options_button.clicked:
+            options_button.clicked = False
+            state.options = True
 
         pygame.display.update()
 
@@ -1082,6 +1162,84 @@ def level_selection():
         pygame.display.update()
 
 
+def options():
+    print('options')
+    clock.tick(settings.CLOCK)
+    click = False
+    volume_draging = False
+    button_group.empty()
+    running = True
+    font_color = (0, 0, 0)
+    slide_button_group.empty()
+
+
+
+    options_button = Button(settings.OPTIONS, settings.OPTIONS_RED,\
+        settings.SCREEN_WIDTH/2 , 80)
+    options_button.blue_image = pygame.transform.scale(options_button.blue_image,\
+        (int(1.5*options_button.rect[2]), int(1.5*options_button.rect[3])))
+    options_button.red_image = pygame.transform.scale(options_button.red_image,\
+        (int(1.5*options_button.rect[2]), int(1.5*options_button.rect[3])))
+    options_button.rect[2] = options_button.blue_image.get_width()
+    options_button.rect[3] = options_button.blue_image.get_height()
+
+    options_button.rect[0] = settings.SCREEN_WIDTH/2 - options_button.blue_image.get_width()/2
+    button_group.add(options_button)
+    audio_text = myfont.render('Music Volume', 1, font_color)
+    audio_bar = pygame.image.load(settings.AUDIO_BAR).convert()
+    audio_bar = pygame.transform.scale(audio_bar,(400,20))
+    audio_bar_rect = audio_bar.get_rect()
+    audio_bar_rect[0] = 200 + audio_text.get_width() + 50
+
+    volume_slide = Slide_button(audio_bar_rect,350 + audio_text.get_height()/2 - audio_bar.get_height()/2 - 5)
+    slide_button_group.add(volume_slide)
+    offset = 0
+
+    while running:
+        clock.tick(settings.CLOCK)
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        screen.blit(BACKGROUND, (0,0))
+        screen.blit(audio_text, (200,350))
+        screen.blit(audio_bar, (200 + audio_text.get_width() + 50,\
+             350 + audio_text.get_height()/2))
+
+
+
+        click = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    if volume_slide.rect.collidepoint(mouse_x, mouse_y):
+                        offset = volume_slide.rect[0] - mouse_x
+                        volume_draging = True
+                    click = True
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    volume_draging = False
+
+            if event.type == pygame.MOUSEMOTION:
+                if volume_draging:
+                    volume_slide.rect[0] = mouse_x + offset
+
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+                    state.level_selection = False
+
+
+        button_group.update(mouse_x, mouse_y, click)
+        slide_button_group.update(audio_bar_rect, 0)
+
+        
+        button_group.draw(screen)
+        slide_button_group.draw(screen)
+        pygame.display.update()
+
 
 def game_level_1():
     running = True
@@ -1136,7 +1294,7 @@ def game_level_1():
         
         blit_game_static_elements(screen)
         update_sprites()
-        level_text_group.update(tick_count)
+        level_text_group.update(tick_count, dialogue)
 
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
@@ -1218,7 +1376,7 @@ def game_level_2():
 
         blit_game_static_elements(screen)
         update_sprites()
-        level_text_group.update(tick_count)
+        level_text_group.update(tick_count, dialogue)
         
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
@@ -1302,7 +1460,7 @@ def game_level_3():
         archer_group.update()
         butterfree_group.update()
         arrow_group.update()
-        level_text_group.update(tick_count)
+        level_text_group.update(tick_count, dialogue)
 
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
@@ -1392,7 +1550,7 @@ def game_level_4():
         archer_group.update()
         target_group.update()
         arrow_group.update()
-        level_text_group.update(tick_count)
+        level_text_group.update(tick_count, dialogue)
         
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
@@ -1496,7 +1654,7 @@ def game_level_5():
         arrow_group.update()
         bridge_group.update()
         slime_group.update()
-        level_text_group.update(tick_count)
+        level_text_group.update(tick_count, dialogue)
         
         
 
@@ -1598,7 +1756,7 @@ def game_level_6():
         arrow_group.update()
         bridge_group.update()
         roman_group.update()
-        level_text_group.update(tick_count)
+        level_text_group.update(tick_count, dialogue)
         
 
         bridge_group.draw(screen)
@@ -1646,6 +1804,7 @@ def game_level_7():
     roman_group.empty()
     slime_group.empty()
     target_group.empty()
+    cloud_group.empty()
 
     mouse_arrow_testing(state.testing)
     archer = Archer()
@@ -1697,7 +1856,7 @@ def game_level_7():
         butterfree_group.update()
         arrow_group.update()
         cloud_group.update()
-        level_text_group.update(tick_count)
+        level_text_group.update(tick_count, dialogue)
 
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
@@ -1790,6 +1949,8 @@ def game_over():
 
 
 pygame.init()
+pygame.mixer.init()
+
 pygame.display.set_caption(settings.WINDOW_NAME)
 
 
@@ -1838,6 +1999,17 @@ else:
     texts = settings.TEXT_LEVELS
 
 
+
+dialogue = pygame.mixer.Channel(2)
+
+button_selection = pygame.mixer.Sound(settings.BUTTON_SELECTION_AUDIO)
+button_selection.set_volume(0.11)
+
+text_effect = pygame.mixer.Sound(settings.TEXT_EFFECT)
+text_effect.set_volume(0.06)
+
+
+
 state = State()
 
 archer_group = pygame.sprite.Group()
@@ -1854,6 +2026,7 @@ bridge_group = pygame.sprite.Group()
 roman_group = pygame.sprite.Group()
 level_text_group = pygame.sprite.Group()
 cloud_group = pygame.sprite.Group()
+slide_button_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()
 

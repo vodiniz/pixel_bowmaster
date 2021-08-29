@@ -143,6 +143,15 @@ PLAY_BUTTON_RED = ('Assets/menu/Play_button_red.png')
 LEVELS = ('Assets/menu/levels.png')
 LEVELS_RED = ('Assets/menu/levels_red.png')
 
+OPTIONS = ('Assets/menu/options.png')
+OPTIONS_RED = ('Assets/menu/options_red.png')
+
+CONTROLS = ('Assets/menu/controls.png')
+CONTROLS_RED = ('Assets/menu/controls_red.png')
+
+ABOUT = ('Assets/menu/about.png')
+ABOUT_RED = ('Assets/menu/about_red.png')
+
 BUTTON_BACKGROUND = ('Assets/menu/button_background.png')
 
 BUTTON_NUMBERS = [
@@ -175,7 +184,10 @@ MENU_BUTTON = ('Assets/menu/menu_text.png')
 MENU_BUTTON_RED = ('Assets/menu/menu_text_red.png')
 TRY_AGAIN_BUTTON = ('Assets/menu/try_again.png')
 TRY_AGAIN_BUTTON_RED = ('Assets/menu/try_again_red.png')
-BUTTON_SCALE = 4
+BUTTON_SCALE = 3.7
+
+AUDIO_BAR = ('Assets/menu/audio_bar.png')
+ROTATE_BUTTON = ('Assets/menu/rotate_button_background.png')
 
 GAME_OVER = [
 'Assets/menu/game_over/game_over_1.png',\
@@ -255,14 +267,14 @@ TEXT_LEVELS.append(TEXT_LEVEL7)
 
 TEXT_LEVELS_PT = []
 
-TEXT_LEVEL1_PT = ["É muito simples, voce tem um arco e tem",\
+TEXT_LEVEL1_PT = ["É muito simples, você tem um arco e há",\
                 " alguns balões na tela, vamos testar essa mira..."]
 TEXT_LEVELS_PT.append(TEXT_LEVEL1_PT)
             
-TEXT_LEVEL2_PT = ["Boa sorte, a dificuldade aumentou."]
+TEXT_LEVEL2_PT = ["Boa sorte, a dificuldade aumentou!"]
 TEXT_LEVELS_PT.append(TEXT_LEVEL2_PT)
 
-TEXT_LEVEL3_PT = ["Ajude as borboletas escaparem!"]
+TEXT_LEVEL3_PT = ["Ajude as borboletas a escaparem!"]
 TEXT_LEVELS_PT.append(TEXT_LEVEL3_PT)
 
 TEXT_LEVEL4_PT = ["Com todo esse treinamento, eu espero que pelo",\
@@ -273,9 +285,15 @@ TEXT_LEVEL5_PT = ["Tente não ser atingido."]
 TEXT_LEVELS_PT.append(TEXT_LEVEL5_PT)
 
 TEXT_LEVEL6_PT = ["Cuidado!!! Um inimigo mais resiliente se encontra logo",\
-                "a frente, espero que voce consiga lidar com eles!"]
+                "à frente, espero que você consiga lidar com eles!"]
 TEXT_LEVELS_PT.append(TEXT_LEVEL6_PT)
 
 TEXT_LEVEL7_PT = ['Essas nuvens parecem bem macias,',\
-                'mas não se deixe enganar pela aparencia...']
+                'mas não se deixe enganar pela aparência...']
 TEXT_LEVELS_PT.append(TEXT_LEVEL7_PT)
+
+
+MENU_MUSIC = ('Assets/music/8bit_power.wav')
+BUTTON_SELECTION_AUDIO = ('Assets/music/button_selection.wav')
+TEXT_EFFECT = ('Assets/music/text_effect.wav')
+MENU_VOLUME = 0.11
