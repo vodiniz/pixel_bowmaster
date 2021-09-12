@@ -306,15 +306,15 @@ TEXT_LEVEL7 = ['These clouds appear to be soft,',\
                 'but they are kind of misleading...']
 TEXT_LEVELS.append(TEXT_LEVEL7)
 
-TEXT_LEVEL8 = ['I know you already went through this',
+TEXT_LEVEL8 = ['I know you already went through this',\
 'but can you keep going ?']
 TEXT_LEVELS.append(TEXT_LEVEL8)
 
-TEXT_LEVEL9 = ['This is the deadliest enemy you will find',
+TEXT_LEVEL9 = ['This is the deadliest enemy you will find',\
 'he can cast spells, be careful.']
 TEXT_LEVELS.append(TEXT_LEVEL9)
 
-TEXT_LEVEL10 = ['An army of wizards lies ahead,',
+TEXT_LEVEL10 = ['An army of wizards lies ahead,',\
 'is this the final challenge ?.']
 TEXT_LEVELS.append(TEXT_LEVEL10)
 
@@ -346,15 +346,15 @@ TEXT_LEVEL7_PT = ['Essas nuvens parecem bem macias,',\
                 'mas não se deixe enganar pela aparência...']
 TEXT_LEVELS_PT.append(TEXT_LEVEL7_PT)
 
-TEXT_LEVEL8_PT = ['Sei que você já passou por isso,'
+TEXT_LEVEL8_PT = ['Sei que você já passou por isso,',\
                     'mas será que sua mira está afiada mesmo ?']
 TEXT_LEVELS_PT.append(TEXT_LEVEL8_PT)
 
-TEXT_LEVEL9_PT = ['Cuidado, a frente se encontra um inimigo poderoso,',
+TEXT_LEVEL9_PT = ['Cuidado, a frente se encontra um inimigo poderoso,',\
                     'ele consegue até mesmo lançar magias.']
 TEXT_LEVELS_PT.append(TEXT_LEVEL9_PT)
 
-TEXT_LEVEL10_PT = ['Há um exercito de magos logo a frente,',
+TEXT_LEVEL10_PT = ['Há um exercito de magos logo a frente,',\
                     'seria esse o desafio final ?']
 TEXT_LEVELS_PT.append(TEXT_LEVEL10_PT)
 
@@ -364,9 +364,9 @@ TEXT_LEVELS_PT.append(TEXT_LEVEL10_PT)
 ABOUT_TEXT = "This is a short game that I’ve decided to make after youtube started to recommend some "\
 "game jam videos, they were so interesting and since I was learning programing, specifically "\
 "python, I decided to make a little game with pygame as a learning method and to have some"\
-"fun. After some thinking I decided to remake an old windows game that I used to play with "\
-"my father in my style. The actual game is called Bow and Arrow. All the pixel art was created "\
-"by me, except the romans, which my brother Rafael made for my game. This game can be found at "\
+"fun. After some thinking I decided to make my own remake of an old windows game that I used to play with "\
+"my father. The original game is called Bow and Arrow. All of the pixel art was created "\
+"by me, except the romans, which was made by my brother Rafael made for my game. This game can be found at "\
 "https://vodiniz.itch.io/pixel-bowmaster or at https://github.com/vodiniz/Archer_Game"\
 "\n"\
 "\n"\
@@ -374,7 +374,7 @@ ABOUT_TEXT = "This is a short game that I’ve decided to make after youtube sta
 
 ABOUT_TEXT_PT = "Esse é um pequeno jogo que eu decidi fazer logo após o youtube me recomendar alguns "\
 "vídeos sobre game jams, os vídeos foram muito interessantes e como eu estava "\
-"aprendendo programação, python para ser mais específico. Eu decidi criar um pequeno "\
+"aprendendo programação, python para ser mais específico, eu decidi criar um pequeno "\
 "jogo com o pygame como uma maneira de me aprofundar em programação, o jogo que eu "\
 "escolhi fazer foi um remake de um antigo jogo de windows, que eu costumava jogar com "\
 "meu pai, o jogo se chama Bow and Arrow. Toda a pixel art foi criada por mim, exceto o "\
