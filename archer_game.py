@@ -480,6 +480,69 @@ class Bridge(pygame.sprite.Sprite):
             self.rect[1] = int(self.position[1])
 
 
+class Wizard(pygame.sprite.Sprite):
+    def __init__(self,xpos,bridge):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.wizard_images = []
+        
+        for image in settings.WIZARD:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(150, 150))
+            self.wizard_images.append(convert_image)
+
+        self.dead_images = []
+
+        for image in settings.WIZARD_DEATH:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(150 , 150))
+            self.dead_images.append(convert_image)
+
+        self.current_image = random.randint(0,len(self.wizard_images)-1)
+
+        self.image = self.wizard_images[self.current_image]
+        self.rect = self.image.get_rect()
+
+        self.dead = False
+        self.shooting = True
+        self.walking = True
+
+        self.wizard_position = [xpos + 300, bridge*200 + 150 -self.rect[3]]
+        self.final_position = xpos
+        self.rect[0] = self.wizard_position[0]
+        self.rect[1] = self.wizard_position[1]
+
+
+    def update(self):
+        if self.dead:
+            self.current_image += settings.WIZARD_DEATH_ANIMATION_SPEED
+        else:
+            self.current_image += settings.WIZARD_CAST_SPEED
+
+        if self.dead:
+            if self.current_image >= len(self.dead_images):
+                self.current_image = len(self.dead_images)-1
+                self.kill()
+                print('dead wizard')
+            self.image = self.dead_images[int(self.current_image)]
+        else:
+            if self.current_image >= len(self.wizard_images):
+                self.current_image = 0
+                self.shooting = True
+            else:
+                self.shooting = False
+
+            self.image = self.wizard_images[int(self.current_image)]
+
+        if self.walking:
+            if self.wizard_position[0] <= self.final_position:
+                self.walking = False
+
+            self.wizard_position[0] -= settings.WIZARD_WALKING_SPEED
+            self.rect[0] = self.wizard_position[0]
+            
+
+ 
 
 
 
@@ -512,6 +575,48 @@ class Arrow(pygame.sprite.Sprite):
         self.rect[0] = self.arrow_position[0]
         if self.arrow_position[0] > 1600:
             self.kill()
+
+class Fireball(pygame.sprite.Sprite):
+
+    def __init__(self,xpos,ypos):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.fireball_images = []
+        
+        for image in settings.FIREBALL:
+            convert_image = pygame.image.load(image).convert_alpha()
+            convert_image = pygame.transform.scale(convert_image,(120, 60))
+            self.fireball_images.append(convert_image)
+
+        self.speed = -settings.FIREBALL_SPEED
+
+        self.current_image = 0
+
+
+        self.image = self.fireball_images[self.current_image]
+
+        self.rect = self.image.get_rect()
+
+        self.fireball_position = [xpos,ypos]
+        self.rect[0], self.rect[1] = xpos, ypos
+
+        fireball_mask = pygame.mask.from_surface(self.image)
+
+    def is_fireball_off_screen(self):
+        if self.fireball_position[0] < -150:
+            self.kill()
+        
+    def update(self):
+        self.current_image += settings.FIREBALL_ANIMATION_SPEED
+        if self.current_image >= len(self.fireball_images):
+            self.current_image = 0
+
+        self.image = self.fireball_images[int(self.current_image)]
+        self.fireball_position[0] += self.speed
+        self.rect[0] = self.fireball_position[0]
+        self.is_fireball_off_screen()
+
+
 
 
 class MouseArrow(pygame.sprite.Sprite):
@@ -582,7 +687,7 @@ class Slide_button(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (10, 50))
         #self.moving = False
         self.max_volume = 0.7
-        self.mix_volume = 0.0
+        self.min_volume = 0.007
     
         self.position = [audio_bar_rect[0] + settings.MENU_VOLUME * audio_bar_rect[2]/self.max_volume , ypos]
 
@@ -598,8 +703,6 @@ class Slide_button(pygame.sprite.Sprite):
         else:
             self.rect [0] = self.rect[0] + offset
         settings.MENU_VOLUME = (self.rect[0] - audio_bar_rect[0]) * self.max_volume / audio_bar_rect[2]
-        print('({} - {}) * {} / {} = {}'.format(self.rect[0],audio_bar_rect[0],audio_bar_rect[2],self.max_volume, settings.MENU_VOLUME))
-        #print('settings volume',settings.MENU_VOLUME)
         pygame.mixer.music.set_volume(settings.MENU_VOLUME)
 
     
@@ -715,9 +818,30 @@ class State:
         self.level9 = False
         self.level10 = False
         self.options = False
+        self.about = False
         self.game_over = False
+        self.text_list = []
         self.testing = False
-        
+        self.about_text = ""
+
+def blit_text(surface, text, pos, font, color=pygame.Color('white')):
+    words = [word.split(' ') for word in text.splitlines()]  # 2D array where each row is a list of words.
+    space = font.size(' ')[0]  # The width of a space.
+    max_width, max_height = pygame.image.load(settings.ABOUT_BACKGROUND).get_size()
+    x, y = pos
+    for line in words:
+        for word in line:
+            word_surface = font.render(word, 0, color)
+            word_width, word_height = word_surface.get_size()
+            word_height += 12
+            if x + word_width >= max_width:
+                x = pos[0]  # Reset the x.
+                y += word_height  # Start on new row.
+            surface.blit(word_surface, (x, y))
+            x += word_width + space
+        x = pos[0]  # Reset the x.
+        y += word_height  # Start on new row.
+
 
 
 def create_arrow_shooting(xpos, ypos):
@@ -768,7 +892,18 @@ def check_roman_collision(arrow_group, roman_group):
                     if roman.health == 0:
                         roman.dead = True
                         roman.current_image = 0
+
+def check_fireball_player_collision(fireball_group, archer):
     
+    for fireball in fireball_group:
+        if fireball.rect[0] <= 200:
+            if pygame.sprite.collide_mask(fireball, archer):
+                return True
+    
+def check_fireball_arrow_collision(arrow_group, fireball_group):
+    pygame.sprite.groupcollide(arrow_group, fireball_group, True, True, \
+        pygame.sprite.collide_mask)
+
 
 def game_over_colission(player_group, enemy_group):
     if pygame.sprite.groupcollide(player_group, enemy_group, False, False, \
@@ -792,6 +927,7 @@ def check_target_center_hit(arrow_group, target_group):
                 arrow_tip_y = arrow.rect[1] + arrow.rect[3] + 15
                 if arrow_tip_y > low_middle_point - 5 and arrow_tip_y < high_middle_point + offset:
                     if arrow_tip_x + 20 > target.rect[0] + (1/3)*target.rect[2] and arrow_tip_x< 1330 :
+                        target.kill()
                         return True
         
 
@@ -804,7 +940,6 @@ def check_cloud_collision(arrow_group, cloud_group):
             if arrow_tip > 555:
                 pass
             else:
-                print('collision')
                 arrow.kill()
 
 
@@ -867,11 +1002,24 @@ def create_romans(roman_group, roman_number):
 
     return roman_number
 
+def create_wizards(wizard_group):
+    for bridge_number in range(4):
+        new_wizard = Wizard(1100, bridge_number)
+        wizard_group.add(new_wizard)
+
+
 def create_clouds(cloud_group):
     cloud_1 = Clouds(random.randint(0,100), True)
     cloud_group.add(cloud_1)
     cloud_2 = Clouds(random.randint(500,600), False)
     cloud_group.add(cloud_2)
+
+def wizard_cast_fireball(wizard_group,fireball_group):
+    for wizard in wizard_group:
+        if wizard.shooting:
+            new_fireball = Fireball(wizard.rect[0] + 40, wizard.rect[1] + 50)
+            fireball_group.add(new_fireball)
+
 
 
 def mouse_arrow_testing(boolean):
@@ -909,6 +1057,17 @@ def check_game_over(player, arrow_group, enemy_group):
         return True
     else:
         return False
+
+def check_bridge_done(bridge_group):
+    bridge_done_count = 0
+    for bridge in bridge_group:
+        if bridge.done:
+            bridge_done_count += 1
+    if bridge_done_count == 4:
+        return True
+    else:
+        return False
+
 
 def recreate_testing_arrow(arrow_group):
     if len(arrow_group) == 0:
@@ -950,6 +1109,14 @@ def play_menu_music(music_file,play):
         pygame.mixer.music.play(-1)
     else:
         pygame.mixer.music.stop()
+
+def update_language():
+    if settings.LANGUAGE == 'pt':
+        return settings.TEXT_LEVELS_PT, settings.ABOUT_TEXT_PT
+    else:
+        return settings.TEXT_LEVELS, settings. ABOUT_TEXT
+        
+
 
 
 def main_menu():
@@ -1031,6 +1198,11 @@ def main_menu():
             state.options = False
             options()
             running = False
+        
+        if state.about:
+            state.about = False
+            about()
+            running = False
 
 
 
@@ -1063,12 +1235,18 @@ def main_menu():
         if play_button.clicked:
             state.level1 = True
             play_button.clicked = False
+
         if level_selection_button.clicked:
             level_selection_button.clicked = False
             state.level_selection = True
+
         if options_button.clicked:
             options_button.clicked = False
             state.options = True
+
+        if about_button.clicked:
+            about_button.clicked = False
+            state.about = True
 
         pygame.display.update()
 
@@ -1139,6 +1317,7 @@ def level_selection():
             if button.name == 'button_number4.png':
                 if button.clicked:
                     game_level_4()
+                    state.level5 = False
                     button.clicked = False
 
             if button.name == 'button_number5.png':
@@ -1154,8 +1333,22 @@ def level_selection():
                 if button.clicked:
                     game_level_7()
                     button.clicked = False
+            if button.name == 'button_number8.png':
+                if button.clicked:
+                    game_level_8()
+                    button.clicked = False
+            if button.name == 'button_number9.png':
+                if button.clicked:
+                    game_level_9()
+                    button.clicked = False
+            if button.name == 'button_number10.png':
+                if button.clicked:
+                    game_level_10()
+                    button.clicked = False
+            
             
 
+        state.level1 = False
         button_group.update(mouse_x, mouse_y, click)
         button_group.draw(screen)
 
@@ -1168,10 +1361,11 @@ def options():
     click = False
     volume_draging = False
     button_group.empty()
-    running = True
-    font_color = (0, 0, 0)
     slide_button_group.empty()
 
+    running = True
+    font_color = (0, 0, 0)
+   
 
 
     options_button = Button(settings.OPTIONS, settings.OPTIONS_RED,\
@@ -1186,6 +1380,7 @@ def options():
     options_button.rect[0] = settings.SCREEN_WIDTH/2 - options_button.blue_image.get_width()/2
     button_group.add(options_button)
     audio_text = myfont.render('Music Volume', 1, font_color)
+    language_text = myfont.render('Language', 1, font_color)
     audio_bar = pygame.image.load(settings.AUDIO_BAR).convert()
     audio_bar = pygame.transform.scale(audio_bar,(400,20))
     audio_bar_rect = audio_bar.get_rect()
@@ -1195,12 +1390,18 @@ def options():
     slide_button_group.add(volume_slide)
     offset = 0
 
+    pt_button = Button(settings.PT_BUTTON, settings.PT_BUTTON_RED, 300 + audio_text.get_width() + 50,440)
+    button_group.add(pt_button)
+    us_button = Button(settings.US_BUTTON, settings.US_BUTTON_RED, 300 + audio_text.get_width() + 200, 440)
+    button_group.add(us_button)
+
     while running:
         clock.tick(settings.CLOCK)
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         screen.blit(BACKGROUND, (0,0))
         screen.blit(audio_text, (200,350))
+        screen.blit(language_text, (200, 450))
         screen.blit(audio_bar, (200 + audio_text.get_width() + 50,\
              350 + audio_text.get_height()/2))
 
@@ -1231,11 +1432,83 @@ def options():
                     running = False
                     state.level_selection = False
 
+        for button in button_group:
+            if button.name == 'pt.png':
+                if button.clicked:
+                    settings.LANGUAGE = 'pt'
+                    state.text_list, state.about_text = update_language()
+            if button.name == 'us.png':
+                if button.clicked:
+                    settings.LANGUAGE = 'us'
+                    state.text_list, state.about_text = update_language()
+
+
 
         button_group.update(mouse_x, mouse_y, click)
         slide_button_group.update(audio_bar_rect, 0)
 
-        
+        button_group.draw(screen)
+        slide_button_group.draw(screen)
+        pygame.display.update()
+
+
+def about():
+    print('about')
+    clock.tick(settings.CLOCK)
+    click = False
+    volume_draging = False
+    button_group.empty()
+    slide_button_group.empty()
+
+    running = True
+    font_color = (0, 0, 0)
+   
+
+    about_button = Button(settings.ABOUT, settings.ABOUT_RED,\
+        settings.SCREEN_WIDTH/2 , 20)
+    about_button.blue_image = pygame.transform.scale(about_button.blue_image,\
+        (int(1.5*about_button.rect[2]), int(1.5*about_button.rect[3])))
+    about_button.red_image = pygame.transform.scale(about_button.red_image,\
+        (int(1.5*about_button.rect[2]), int(1.5*about_button.rect[3])))
+    about_button.rect[2] = about_button.blue_image.get_width()
+    about_button.rect[3] = about_button.blue_image.get_height()
+
+    about_button.rect[0] = settings.SCREEN_WIDTH/2 - about_button.blue_image.get_width()/2
+    button_group.add(about_button)
+    about_font = pygame.font.Font(settings.PIXEL_FONT, 28)
+
+    text_background = pygame.image.load(settings.ABOUT_BACKGROUND).convert()
+    
+    while running:
+        clock.tick(settings.CLOCK)
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        screen.blit(BACKGROUND, (0,0))
+        screen.blit(text_background, (100, 140))    
+        blit_text(screen, state.about_text, [150, 190], about_font )
+
+
+        click = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    volume_draging = False
+
+
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+                    state.level_selection = False
+
+
+
+
+        button_group.update(mouse_x, mouse_y, click)
+
         button_group.draw(screen)
         slide_button_group.draw(screen)
         pygame.display.update()
@@ -1254,7 +1527,7 @@ def game_level_1():
     archer = Archer()
     archer_group.add(archer)
     create_balloons(15)
-    level_text1 = Level_text(texts[0], text_font)
+    level_text1 = Level_text(state.text_list[0], text_font)
     level_text_group.add(level_text1)
     while running:
         clock.tick(settings.CLOCK)
@@ -1337,7 +1610,7 @@ def game_level_2():
     archer_group.add(archer)
     create_random_balloons(15)
 
-    level_text1 = Level_text(texts[1], text_font)
+    level_text1 = Level_text(state.text_list[1], text_font)
     level_text_group.add(level_text1)
 
     while running:
@@ -1417,7 +1690,7 @@ def game_level_3():
     archer = Archer()
     archer_group.add(archer)
     create_butterfree(15)
-    level_text3 = Level_text(texts[2], text_font)
+    level_text3 = Level_text(state.text_list[2], text_font)
     level_text_group.add(level_text3)
 
     while running:
@@ -1506,7 +1779,7 @@ def game_level_4():
     archer_group.add(archer)
     target = Target()
     target_group.add(target)
-    level_text4 = Level_text(texts[3], text_font)
+    level_text4 = Level_text(state.text_list[3], text_font)
     level_text_group.add(level_text4)
 
 
@@ -1555,9 +1828,8 @@ def game_level_4():
         arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
         screen.blit(arrow_count_label,(1305, 27))
 
-        if check_target_center_hit(arrow_group, target_group):
-            state.level5 = True
-            running = False
+        check_target_center_hit(arrow_group, target_group)
+
         
         archer_group.draw(screen)
         target_group.draw(screen)
@@ -1603,7 +1875,7 @@ def game_level_5():
     slime_count = settings.SLIME_SPAWN_NUMBER
     easter_egg = random.randint(0,slime_count -1)
 
-    level_text5 = Level_text(texts[4], text_font)
+    level_text5 = Level_text(state.text_list[4], text_font)
     level_text_group.add(level_text5)
 
 
@@ -1706,7 +1978,7 @@ def game_level_6():
     archer_group.add(archer)
     create_bridges(bridge_group)
     roman_count = settings.ROMAN_SPAWN_NUMBER
-    level_text6 = Level_text(texts[5], text_font)
+    level_text6 = Level_text(state.text_list[5], text_font)
     level_text_group.add(level_text6)
 
 
@@ -1810,7 +2082,7 @@ def game_level_7():
     archer = Archer()
     archer_group.add(archer)
     create_butterfree(15)
-    level_text7 = Level_text(texts[6], text_font)
+    level_text7 = Level_text(state.text_list[6], text_font)
     level_text_group.add(level_text7)
     create_clouds(cloud_group)
 
@@ -1887,6 +2159,327 @@ def game_level_7():
         pygame.display.update()
 
 
+def game_level_8():
+    running = True
+    tick_count = 0
+    print('level 8')
+
+    
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+    target_group.empty()
+    level_text_group.empty()
+    cloud_group.empty()
+    slime_group.empty()
+    roman_group.empty()
+    bridge_group.empty()
+    butterfree_group.empty()
+
+
+    mouse_arrow_testing(state.testing)
+    archer = Archer()
+    archer_group.add(archer)
+    target = Target()
+    target.speed =  target.speed*2.6
+    target_group.add(target)
+    level_text8 = Level_text(state.text_list[7], text_font)
+    level_text_group.add(level_text8)
+
+
+    while running:
+        clock.tick(settings.CLOCK)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+                    state.level4 = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+
+        archer_group.update()
+        target_group.update()
+        arrow_group.update()
+        level_text_group.update(tick_count, dialogue)
+        
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+        screen.blit(arrow_count_label,(1305, 27))
+
+        if check_target_center_hit(arrow_group, target_group):
+            state.level5 = True
+            running = False
+        
+        archer_group.draw(screen)
+        target_group.draw(screen)
+        arrow_group.draw(screen)
+        level_text_group.draw(screen)
+  
+
+        if go_next_next_level(target_group):
+            state.level9 = True
+            running = False
+
+        if archer.arrows == 0 and len(arrow_group) == 0:
+            if state.level9:
+                pass
+            else:
+                game_over()
+                state.level8 = False
+                running = False
+
+       
+        pygame.display.update()
+        tick_count += 1
+
+
+def game_level_9():
+    running = True
+    bridge_done = False
+    bridge_counting = True
+    tick_count = 0
+    print('level 9')
+    
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+    bridge_group.empty()
+    roman_group.empty()
+    cloud_group.empty()
+    butterfree_group.empty()
+    target_group.empty()
+    wizard_group.empty()
+    fireball_group.empty()
+
+    mouse_arrow_testing(state.testing)
+    archer = Archer()
+    archer_group.add(archer)
+    create_bridges(bridge_group)
+    level_text9 = Level_text(state.text_list[8], text_font)
+    level_text_group.add(level_text9)
+
+
+    while running:
+        clock.tick(settings.CLOCK)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+                    state.level9 = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+        
+        archer_group.update()
+        arrow_group.update()
+        bridge_group.update()
+        wizard_group.update()
+        fireball_group.update()
+
+        level_text_group.update(tick_count, dialogue)
+        
+        if bridge_counting:
+            if check_bridge_done(bridge_group):
+                new_wizard = Wizard(1100, 2)
+                wizard_group.add(new_wizard)
+                bridge_counting = False
+
+
+        bridge_group.draw(screen)
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+
+        check_simple_collision(arrow_group, wizard_group)
+        wizard_cast_fireball(wizard_group, fireball_group)
+        check_fireball_arrow_collision(arrow_group, fireball_group)
+        
+        
+        archer_group.draw(screen)
+        arrow_group.draw(screen)
+        wizard_group.draw(screen)
+        fireball_group.draw(screen)
+        screen.blit(ARROW_COUNT_MENU, ( settings.SCREEN_WIDTH - ARROW_COUNT_MENU.get_width(), 0))
+        screen.blit(arrow_count_label,(1305, 27))
+        level_text_group.draw(screen)
+
+
+        if go_next_next_level(wizard_group):
+            if tick_count > 700:
+                state.level10 = True
+                running = False
+
+        if check_fireball_player_collision(fireball_group,archer):
+            if state.level10:
+                pass
+            else:
+                print('game over')
+                state.level9 = False
+                game_over()
+                running = False
+
+        tick_count += 1
+        pygame.display.update()
+
+
+def game_level_10():
+    running = True
+    bridge_done = False
+    bridge_counting = True
+    tick_count = 0
+    print('level 9')
+    
+    archer_group.empty()
+    balloon_group.empty()
+    arrow_group.empty()
+    bridge_group.empty()
+    roman_group.empty()
+    cloud_group.empty()
+    butterfree_group.empty()
+    target_group.empty()
+    wizard_group.empty()
+    fireball_group.empty()
+
+    mouse_arrow_testing(state.testing)
+    archer = Archer()
+    archer_group.add(archer)
+    create_bridges(bridge_group)
+    level_text10 = Level_text(state.text_list[9], text_font)
+    level_text_group.add(level_text10)
+
+
+    while running:
+        clock.tick(settings.CLOCK)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == KEYDOWN:
+
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = True
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = True
+                if event.key == settings.SHOOT_KEY:
+                    if archer.shooting == False:
+                        if(archer.arrows == 0):
+                            pass
+                        else:
+                            archer.shooting = True
+                    if archer.shooting == True:
+                        if archer.shooting_ready:
+                            archer.shoot()
+                            create_arrow_shooting(archer.archer_position[0], archer.archer_position[1])
+
+                if event.key == K_ESCAPE:
+                    running = False
+                    state.level9 = False
+
+                    
+            if event.type == KEYUP:
+                if event.key == settings.MOVE_UP_KEY:
+                    archer.moving_up = False
+                if event.key == settings.MOVE_DOWN_KEY:
+                    archer.moving_down = False
+
+        blit_game_static_elements(screen)
+        
+        archer_group.update()
+        arrow_group.update()
+        bridge_group.update()
+        wizard_group.update()
+        fireball_group.update()
+
+        level_text_group.update(tick_count, dialogue)
+        
+        if bridge_counting:
+            if check_bridge_done(bridge_group):
+                create_wizards(wizard_group)
+                bridge_counting = False
+
+
+        bridge_group.draw(screen)
+        arrow_count_label = myfont.render(str(archer.arrows),1,(255,255,255))
+
+        check_simple_collision(arrow_group, wizard_group)
+        wizard_cast_fireball(wizard_group, fireball_group)
+        check_fireball_arrow_collision(arrow_group, fireball_group)
+        
+        
+        archer_group.draw(screen)
+        arrow_group.draw(screen)
+        wizard_group.draw(screen)
+        fireball_group.draw(screen)
+        screen.blit(ARROW_COUNT_MENU, ( settings.SCREEN_WIDTH - ARROW_COUNT_MENU.get_width(), 0))
+        screen.blit(arrow_count_label,(1305, 27))
+        level_text_group.draw(screen)
+
+
+        if go_next_next_level(wizard_group):
+            if tick_count > 700:
+                print('YOU WON !!!')
+                running = False
+
+        if check_fireball_player_collision(fireball_group,archer):
+            if state.level7:
+                pass
+            else:
+                print('game over')
+                state.level9 = False
+                game_over()
+                running = False
+
+        tick_count += 1
+        pygame.display.update()
 
 
 
@@ -1993,10 +2586,7 @@ STATIC_GAME_OVER = pygame.transform.scale(STATIC_GAME_OVER,\
         int(settings.GAME_OVER_SCALE*STATIC_GAME_OVER.get_height()))))
 language = settings.LANGUAGE
 
-if language == 'pt':
-    texts = settings.TEXT_LEVELS_PT
-else:
-    texts = settings.TEXT_LEVELS
+
 
 
 
@@ -2011,6 +2601,8 @@ text_effect.set_volume(0.06)
 
 
 state = State()
+state.text_list, state.about_text = update_language()
+
 
 archer_group = pygame.sprite.Group()
 archer = Archer()
@@ -2026,6 +2618,8 @@ bridge_group = pygame.sprite.Group()
 roman_group = pygame.sprite.Group()
 level_text_group = pygame.sprite.Group()
 cloud_group = pygame.sprite.Group()
+wizard_group = pygame.sprite.Group()
+fireball_group = pygame.sprite.Group()
 slide_button_group = pygame.sprite.Group()
 
 clock = pygame.time.Clock()

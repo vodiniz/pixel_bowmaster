@@ -115,6 +115,41 @@ CLOUD_SPEED = round(random.uniform(2, 2.7), 1)
 BRIDGE = 'Assets/textures/wood_floor_bridge.png'
 BRIDGE_SPEED = 2.4
 
+WIZARD = ['Assets/wizard/wizard1.png',
+'Assets/wizard/wizard2.png',
+'Assets/wizard/wizard3.png',
+'Assets/wizard/wizard4.png',
+'Assets/wizard/wizard5.png',
+'Assets/wizard/wizard6.png',
+'Assets/wizard/wizard7.png'
+]
+
+WIZARD_DEATH = ['Assets/wizard/wizard_death1.png',
+'Assets/wizard/wizard_death2.png',
+'Assets/wizard/wizard_death3.png',
+'Assets/wizard/wizard_death4.png',
+'Assets/wizard/wizard_death5.png',
+'Assets/wizard/wizard_death6.png',
+'Assets/wizard/wizard_death7.png'
+]
+
+WIZARD_ANIMATION_SPEED = 0.15
+WIZARD_WALKING_SPEED = 2
+WIZARD_DEATH_ANIMATION_SPEED = 0.17
+WIZARD_CAST_SPEED = 0.06
+
+FIREBALL = ['Assets/fireball/fireball1.png',
+'Assets/fireball/fireball2.png',
+'Assets/fireball/fireball3.png',
+'Assets/fireball/fireball4.png',
+'Assets/fireball/fireball5.png',
+'Assets/fireball/fireball6.png',
+'Assets/fireball/fireball7.png',
+'Assets/fireball/fireball8.png'
+]
+
+FIREBALL_SPEED = 5
+FIREBALL_ANIMATION_SPEED = 0.15
 
 CLOCK = 60
 
@@ -154,6 +189,12 @@ ABOUT_RED = ('Assets/menu/about_red.png')
 
 BUTTON_BACKGROUND = ('Assets/menu/button_background.png')
 
+PT_BUTTON = ('Assets/menu/pt.png')
+PT_BUTTON_RED = ('Assets/menu/pt_red.png')
+
+US_BUTTON = ('Assets/menu/us.png')
+US_BUTTON_RED = ('Assets/menu/us_red.png') 
+
 BUTTON_NUMBERS = [
     ('Assets/menu/button_number/button_number1.png'),
     ('Assets/menu/button_number/button_number2.png'),
@@ -184,6 +225,7 @@ MENU_BUTTON = ('Assets/menu/menu_text.png')
 MENU_BUTTON_RED = ('Assets/menu/menu_text_red.png')
 TRY_AGAIN_BUTTON = ('Assets/menu/try_again.png')
 TRY_AGAIN_BUTTON_RED = ('Assets/menu/try_again_red.png')
+ABOUT_BACKGROUND = ('Assets/menu/about_background.png')
 BUTTON_SCALE = 3.7
 
 AUDIO_BAR = ('Assets/menu/audio_bar.png')
@@ -260,9 +302,21 @@ TEXT_LEVEL6 = ["Take care, a more resilient enemy is coming",\
                 "hope you can handle it!"]
 TEXT_LEVELS.append(TEXT_LEVEL6)
 
-TEXT_LEVEL7 = ['These cloud appear to be soft,',\
-                'but they are kind of misleading.']
+TEXT_LEVEL7 = ['These clouds appear to be soft,',\
+                'but they are kind of misleading...']
 TEXT_LEVELS.append(TEXT_LEVEL7)
+
+TEXT_LEVEL8 = ['I know you already went through this',
+'but can you keep going ?']
+TEXT_LEVELS.append(TEXT_LEVEL8)
+
+TEXT_LEVEL9 = ['This is the deadliest enemy you will find',
+'he can cast spells, be careful.']
+TEXT_LEVELS.append(TEXT_LEVEL9)
+
+TEXT_LEVEL10 = ['An army of wizards lies ahead,',
+'is this the final challenge ?.']
+TEXT_LEVELS.append(TEXT_LEVEL10)
 
 
 TEXT_LEVELS_PT = []
@@ -292,8 +346,46 @@ TEXT_LEVEL7_PT = ['Essas nuvens parecem bem macias,',\
                 'mas não se deixe enganar pela aparência...']
 TEXT_LEVELS_PT.append(TEXT_LEVEL7_PT)
 
+TEXT_LEVEL8_PT = ['Sei que você já passou por isso,'
+                    'mas será que sua mira está afiada mesmo ?']
+TEXT_LEVELS_PT.append(TEXT_LEVEL8_PT)
+
+TEXT_LEVEL9_PT = ['Cuidado, a frente se encontra um inimigo poderoso,',
+                    'ele consegue até mesmo lançar magias.']
+TEXT_LEVELS_PT.append(TEXT_LEVEL9_PT)
+
+TEXT_LEVEL10_PT = ['Há um exercito de magos logo a frente,',
+                    'seria esse o desafio final ?']
+TEXT_LEVELS_PT.append(TEXT_LEVEL10_PT)
+
+
+
+
+ABOUT_TEXT = "This is a short game that I’ve decided to make after youtube started to recommend some "\
+"game jam videos, they were so interesting and since I was learning programing, specifically "\
+"python, I decided to make a little game with pygame as a learning method and to have some"\
+"fun. After some thinking I decided to remake an old windows game that I used to play with "\
+"my father in my style. The actual game is called Bow and Arrow. All the pixel art was created "\
+"by me, except the romans, which my brother made for my game. This game can be found at "\
+"http://vodiniz.itch.io/ or at https://github.com/vodiniz/Archer_Game"\
+"\n"\
+"\n"\
+"Music: '8 Bit Power' By HeatleyBros https://youtu.be/UJ9NbyPFTvY"
+
+ABOUT_TEXT_PT = "Esse é um pequeno jogo que eu decidi fazer logo após o youtube me recomendar alguns "\
+"vídeos sobre game jams, os vídeos foram muito interessantes e como eu estava "\
+"aprendendo programação, python para ser mais específico. Eu decidi criar um pequeno "\
+"jogo com o pygame como uma maneira de aprofundar na programação, o jogo que eu "\
+"escolhi fazer foi um remake de um antigo jogo de windows, que eu costumava jogar com "\
+"meu pai, o jogo se chama Bow and Arrow. Toda a pixel art foi criada por mim, exceto o "\
+"romano, que foi criado pelo meu irmão. O jogo pode ser encontrado em http://vodiniz.itch.io/ "\
+"ou https://github.com/vodiniz/Archer_Game"\
+"\n"\
+"\n"\
+"Music: '8 Bit Power' By HeatleyBros https://youtu.be/UJ9NbyPFTvY"
+
 
 MENU_MUSIC = ('Assets/music/8bit_power.wav')
 BUTTON_SELECTION_AUDIO = ('Assets/music/button_selection.wav')
 TEXT_EFFECT = ('Assets/music/text_effect.wav')
-MENU_VOLUME = 0.11
+MENU_VOLUME = 0.009
