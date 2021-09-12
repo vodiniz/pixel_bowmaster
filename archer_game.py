@@ -1046,7 +1046,7 @@ def draw_sprites(screen):
 
 
 def check_game_over(player, arrow_group, enemy_group):
-    popped_enemies =0
+    popped_enemies = 0
     if player.arrows == 0 and len(arrow_group) == 0:
         for enemy in enemy_group:
             if enemy.popped:
@@ -1176,15 +1176,15 @@ def main_menu():
             state.level7 = False
 
         if state.level8:
-            #game_level_8()
+            game_level_8()
             state.level8 = False
 
         if state.level9:
-            #game_level_9()
+            game_level_9()
             state.level9 = False
 
         if state.level10:
-            #game_level_10()
+            game_level_10()
             state.level10 = False
         
 
