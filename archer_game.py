@@ -523,7 +523,6 @@ class Wizard(pygame.sprite.Sprite):
             if self.current_image >= len(self.dead_images):
                 self.current_image = len(self.dead_images)-1
                 self.kill()
-                print('dead wizard')
             self.image = self.dead_images[int(self.current_image)]
         else:
             if self.current_image >= len(self.wizard_images):
@@ -1253,7 +1252,6 @@ def main_menu():
 
 
 def level_selection():
-    print('level selection')
     clock.tick(settings.CLOCK)
 
     click = False
@@ -1295,7 +1293,6 @@ def level_selection():
                     state.level_selection = False
 
         if menu_button.clicked:
-            print('go to menu')
             running = False
 
         for button in button_group:
@@ -1356,7 +1353,6 @@ def level_selection():
 
 
 def options():
-    print('options')
     clock.tick(settings.CLOCK)
     click = False
     volume_draging = False
@@ -1453,7 +1449,6 @@ def options():
 
 
 def about():
-    print('about')
     clock.tick(settings.CLOCK)
     click = False
     volume_draging = False
@@ -1598,7 +1593,6 @@ def game_level_1():
 def game_level_2():
     running = True
     tick_count = 0
-    print('level 2')
 
     archer_group.empty()
     balloon_group.empty()
@@ -1677,8 +1671,6 @@ def game_level_2():
 def game_level_3():
     running = True
     tick_count = 0
-    print('level 3')
-
     
     archer_group.empty()
     balloon_group.empty()
@@ -1765,8 +1757,6 @@ def game_level_3():
 def game_level_4():
     running = True
     tick_count = 0
-    print('level 4')
-
     
     archer_group.empty()
     balloon_group.empty()
@@ -1859,7 +1849,6 @@ def game_level_5():
     bridge_done = False
     bridge_count = 0
     tick_count = 0
-    print('level 5')
         
     archer_group.empty()
     balloon_group.empty()
@@ -1965,7 +1954,6 @@ def game_level_6():
     bridge_done = False
     bridge_count = 0
     tick_count = 0
-    print('level 6')
     
     archer_group.empty()
     balloon_group.empty()
@@ -2064,8 +2052,6 @@ def game_level_6():
 def game_level_7():
     running = True
     tick_count = 0
-    print('level 7')
-
     
     archer_group.empty()
     balloon_group.empty()
@@ -2162,7 +2148,6 @@ def game_level_7():
 def game_level_8():
     running = True
     tick_count = 0
-    print('level 8')
 
     
     archer_group.empty()
@@ -2264,7 +2249,6 @@ def game_level_9():
     bridge_done = False
     bridge_counting = True
     tick_count = 0
-    print('level 9')
     
     archer_group.empty()
     balloon_group.empty()
@@ -2362,7 +2346,6 @@ def game_level_9():
             if state.level10:
                 pass
             else:
-                print('game over')
                 state.level9 = False
                 game_over()
                 running = False
@@ -2376,7 +2359,6 @@ def game_level_10():
     bridge_done = False
     bridge_counting = True
     tick_count = 0
-    print('level 9')
     
     archer_group.empty()
     balloon_group.empty()
@@ -2466,14 +2448,12 @@ def game_level_10():
 
         if go_next_next_level(wizard_group):
             if tick_count > 700:
-                print('YOU WON !!!')
                 running = False
 
         if check_fireball_player_collision(fireball_group,archer):
             if state.level7:
                 pass
             else:
-                print('game over')
                 state.level9 = False
                 game_over()
                 running = False
