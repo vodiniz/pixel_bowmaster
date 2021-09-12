@@ -366,7 +366,7 @@ ABOUT_TEXT = "This is a short game that I’ve decided to make after youtube sta
 "python, I decided to make a little game with pygame as a learning method and to have some"\
 "fun. After some thinking I decided to remake an old windows game that I used to play with "\
 "my father in my style. The actual game is called Bow and Arrow. All the pixel art was created "\
-"by me, except the romans, which my brother made for my game. This game can be found at "\
+"by me, except the romans, which my brother Rafael made for my game. This game can be found at "\
 "https://vodiniz.itch.io/pixel-bowmaster or at https://github.com/vodiniz/Archer_Game"\
 "\n"\
 "\n"\
@@ -375,10 +375,10 @@ ABOUT_TEXT = "This is a short game that I’ve decided to make after youtube sta
 ABOUT_TEXT_PT = "Esse é um pequeno jogo que eu decidi fazer logo após o youtube me recomendar alguns "\
 "vídeos sobre game jams, os vídeos foram muito interessantes e como eu estava "\
 "aprendendo programação, python para ser mais específico. Eu decidi criar um pequeno "\
-"jogo com o pygame como uma maneira de aprofundar na programação, o jogo que eu "\
+"jogo com o pygame como uma maneira de me aprofundar em programação, o jogo que eu "\
 "escolhi fazer foi um remake de um antigo jogo de windows, que eu costumava jogar com "\
 "meu pai, o jogo se chama Bow and Arrow. Toda a pixel art foi criada por mim, exceto o "\
-"romano, que foi criado pelo meu irmão. O jogo pode ser encontrado em https://vodiniz.itch.io/pixel-bowmaster "\
+"romano, que foi criado pelo meu irmão Rafael. O jogo pode ser encontrado em https://vodiniz.itch.io/pixel-bowmaster "\
 "ou https://github.com/vodiniz/Archer_Game"\
 "\n"\
 "\n"\
